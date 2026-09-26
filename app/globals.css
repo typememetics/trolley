@@ -112,4 +112,21 @@ figcaption {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.auth a { color: inherit; }
+
+/* The way to the leaderboard, pinned to the page's top right */
+.corner-link {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 6;
+  padding: 8px 18px;
+  font-size: clamp(16px, 2.4vw, 22px);
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--bg);
+  border: 3px solid var(--ink);
+}
+.corner-link:hover { color: var(--bg); background: var(--ink); }

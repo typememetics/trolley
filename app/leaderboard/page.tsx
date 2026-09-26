@@ -9,7 +9,7 @@ import { auth } from "@/lib/auth";
 import { getLeaderboard } from "@/lib/leaderboard/queries";
 
 export const metadata: Metadata = {
-  title: "JEV Leaderboard · The Trolley Problem",
+  title: "Leaderboard · The Trolley Problem",
 };
 
 const percent = (rate: number) => `${(rate * 100).toFixed(1)}%`;
@@ -31,7 +31,7 @@ export default async function LeaderboardPage() {
 
   return (
     <main className="leaderboard">
-      <h1>JEV Leaderboard</h1>
+      <h1>Leaderboard</h1>
       <p className="auth">Signed in as {session.user.name} <SignOutButton/></p>
       <nav className="leaderboard-nav"><Link href="/">Back to game</Link></nav>
 

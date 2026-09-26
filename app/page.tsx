@@ -46,19 +46,20 @@ export default async function Home() {
   }
 
   return (
-    // A new key per render: drawing the next opponent starts a fresh matchup
-    <PlayableMatchup
-      key={crypto.randomUUID()}
-      matchup={matchup}
-      judge={judge}
-      defense={defense}
-      theirs={opponent
-        ? <OpponentDefense opponent={opponent}/>
-        : <p className="notice">No other developer has entered the trolley yet.</p>}
-    >
-      <p className="auth">
-        Signed in as {matchup.player.name} <SignOutButton/> · <Link href="/leaderboard">Leaderboard</Link>
-      </p>
-    </PlayableMatchup>
+    <>
+      <Link className="corner-link" href="/leaderboard">Leaderboard</Link>
+      {/* A new key per render: drawing the next opponent starts a fresh matchup */}
+      <PlayableMatchup
+        key={crypto.randomUUID()}
+        matchup={matchup}
+        judge={judge}
+        defense={defense}
+        theirs={opponent
+          ? <OpponentDefense opponent={opponent}/>
+          : <p className="notice">No other developer has entered the trolley yet.</p>}
+      >
+        <p className="auth">Signed in as {matchup.player.name} <SignOutButton/></p>
+      </PlayableMatchup>
+    </>
   );
 }
