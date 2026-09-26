@@ -21,12 +21,17 @@ export interface PlayerIdentity {
   image: string | null;
 }
 
+/** Who is tied where. Absent when nobody is signed in: the scene then shows two anonymous victims. */
+export interface Matchup {
+  /** The signed-in player, on the lower (main) track the trolley takes by default. */
+  player: PlayerIdentity;
+  /** Their opponent, on the upper (diverted) track; null while nobody else is eligible. */
+  opponent: PlayerIdentity | null;
+}
+
 interface TrolleyGameProps {
   ref?: Ref<TrolleyGameHandle>;
-  /** The signed-in player, on the lower (main) track the trolley takes by default. */
-  player?: PlayerIdentity;
-  /** Their opponent, on the upper (diverted) track. */
-  opponent?: PlayerIdentity;
+  matchup?: Matchup;
 }
 
 const SHOW_DEV_CONTROLS = process.env.NODE_ENV === "development";
@@ -66,7 +71,7 @@ function victimElements(nodes: VictimRefs): VictimElements {
   return { body: must(nodes.body), blood: must(nodes.blood), pool: must(nodes.pool), gore: must(nodes.gore) };
 }
 
-export function TrolleyGame({ ref, player, opponent }: TrolleyGameProps) {
+export function TrolleyGame({ ref, matchup }: TrolleyGameProps) {
   const [{ figure, scene, gore }] = useState(createGameRefs);
   const engine = useRef<TrolleyEngine>(null);
 
@@ -102,7 +107,7 @@ export function TrolleyGame({ ref, player, opponent }: TrolleyGameProps) {
   return (
     <>
       <figure ref={figure}>
-        <TrolleyScene nodes={scene} player={player} opponent={opponent}/>
+        <TrolleyScene nodes={scene} matchup={matchup}/>
         <figcaption>Do you pull the lever?</figcaption>
       </figure>
       <GoreEffects nodes={gore}/>

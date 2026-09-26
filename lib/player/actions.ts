@@ -1,12 +1,11 @@
 "use server";
 
-import { refresh } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { MAX_DEFENSE_LENGTH } from "@/lib/game/rules";
 import { saveStandingDefense } from "./profile";
 
-export type SaveDefenseResult = { error: string } | { error?: never };
+export type SaveDefenseResult = { error: string; saved?: never } | { error?: never; saved: string };
 
 /** The browser sends only the text; whose defense it is comes from the session. */
 export async function saveStandingDefenseAction(formData: FormData): Promise<SaveDefenseResult> {
@@ -19,6 +18,6 @@ export async function saveStandingDefenseAction(formData: FormData): Promise<Sav
   if (defense.length > MAX_DEFENSE_LENGTH) return { error: `Keep it under ${MAX_DEFENSE_LENGTH} characters.` };
 
   await saveStandingDefense(session.user.id, defense);
-  refresh();
-  return {};
+  // No refresh(): re-rendering the page would draw a new opponent. The form shows what was saved.
+  return { saved: defense };
 }

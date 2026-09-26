@@ -6,11 +6,18 @@ export interface Opponent {
   userId: string;
   name: string;
   image: string | null;
-  /** Server-only: Phase 3 hands this to Jev. Never send it to the browser. */
   standingDefense: string;
 }
 
-/** A random other player with a written defense, or null if nobody qualifies yet. */
+/** What the current player sees of their opponent: who they are and the case they're making. No ids. */
+export type OpponentView = Pick<Opponent, "name" | "image" | "standingDefense">;
+
+export const toOpponentView = ({ name, image, standingDefense }: Opponent): OpponentView => ({ name, image, standingDefense });
+
+/**
+ * A random other player with a written defense, or null if nobody qualifies yet.
+ * Your own defense decides whether others can draw you, never whether you get an opponent.
+ */
 export async function findRandomOpponent(currentUserId: string): Promise<Opponent | null> {
   const [row] = await db
     .select({

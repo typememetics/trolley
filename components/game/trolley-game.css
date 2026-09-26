@@ -100,8 +100,20 @@
   margin: -2.77% 0 0 5.96%;
   transform: translate(-50%, -50%) rotate(-24deg);
 }
-/* .scene img sets display, which would otherwise beat the hidden attribute */
-.scene .victim-avatar[hidden] { display: none; }
+/* Who each victim is, captioned above the living head; grows upward so long names wrap instead of clipping */
+.victim-tag {
+  position: absolute;
+  max-width: 18%;
+  margin: -7.6% 0 0 5.14%;
+  transform: translate(-50%, -100%);
+  padding: 1px 6px;
+  background: #fff;
+  border: 1px solid #111;
+  font: italic clamp(10px, 1.4vw, 14px) / 1.2 Georgia, "Times New Roman", serif;
+  text-align: center;
+  z-index: 2;
+  pointer-events: none;
+}
 .person-blood .pool ellipse { transform-box: fill-box; transform-origin: center;
                           animation: pool-spread 1.4s ease-out both; }
 @keyframes pool-spread { from { transform: scale(0); } }

@@ -66,3 +66,18 @@ figcaption {
 }
 .defense button { font: inherit; cursor: pointer; margin: 0 3px; }
 .defense .defense-error { color: #A52F2F; font-style: normal; }
+
+/* The two cases side by side: theirs and yours */
+.matchup {
+  position: relative;
+  z-index: 5;
+  width: min(100%, 1100px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: start;
+  column-gap: 48px;
+}
+.matchup > * { flex: 1 1 280px; max-width: 520px; }
+.matchup .notice { margin-top: 16px; }
+.defense .defense-who { font-style: normal; }
