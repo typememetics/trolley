@@ -12,6 +12,11 @@ export interface JevDecision {
   model: string;
 }
 
+/** JEV answered, but with something that can't be a ruling. Distinct from JEV not answering. */
+export class InvalidJevResultError extends Error {
+  name = "InvalidJevResultError";
+}
+
 let client: TypeSafeClient | undefined;
 
 /**
@@ -20,12 +25,19 @@ let client: TypeSafeClient | undefined;
  */
 const typesafe = () => (client ??= new TypeSafeClient());
 
+const isUnit = (n: unknown): n is number => typeof n === "number" && n >= 0 && n <= 1;
+
 /**
  * Ask JEV whether to flip, weighing the current player's defense against their
  * opponent's. Throws on blank input or any service failure; there is no fallback
- * decision, because a failed call means there was no referee.
+ * decision, because a failed call means there was no referee. `signal` bounds the
+ * whole call, SDK retries included.
  */
-export async function evaluateRound(playerDefense: string, opponentDefense: string): Promise<JevDecision> {
+export async function evaluateRound(
+  playerDefense: string,
+  opponentDefense: string,
+  { signal }: { signal?: AbortSignal } = {},
+): Promise<JevDecision> {
   const argument = playerDefense.trim();
   const defense = opponentDefense.trim();
   if (!argument || !defense) throw new Error("Both players need a standing defense");
@@ -38,15 +50,21 @@ export async function evaluateRound(playerDefense: string, opponentDefense: stri
       opponent_standing_defense: defense,
     },
     questions: { lever: LEVER_QUESTION },
-  });
+  }, { signal });
 
-  // The SDK types this already; check anyway, since this value decides who the trolley hits.
+  // The SDK types this already; check anyway, since this value decides who the trolley hits
+  // and is kept for good.
   if (lever.choice !== "flip" && lever.choice !== "dont_flip") {
-    throw new Error(`JEV returned an unknown choice: ${String(lever.choice)}`);
+    throw new InvalidJevResultError(`JEV returned an unknown choice: ${String(lever.choice)}`);
   }
+  const { flip, dont_flip } = lever.probabilities;
+  if (!isUnit(flip) || !isUnit(dont_flip) || !isUnit(lever.confidence)) {
+    throw new InvalidJevResultError("JEV returned probabilities or confidence outside [0, 1]");
+  }
+  if (typeof model !== "string" || !model.trim()) throw new InvalidJevResultError("JEV did not report its model");
   return {
     decision: lever.choice,
-    probabilities: { flip: lever.probabilities.flip, dont_flip: lever.probabilities.dont_flip },
+    probabilities: { flip, dont_flip },
     confidence: lever.confidence,
     model,
   };

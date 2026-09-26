@@ -104,3 +104,19 @@ figcaption {
 .judge button:hover:not(:disabled) { color: var(--ink); background: var(--bg); }
 .judge button:disabled { opacity: 0.4; cursor: default; }
 .judge .defense-error { margin: 8px 0 0; color: #A52F2F; font-size: 14px; }
+
+/* Where a stored round stands: waiting on JEV, or what JEV decided */
+.judge .verdict {
+  margin: 0 0 16px;
+  font-size: clamp(18px, 3vw, 26px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.judge .verdict small {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  letter-spacing: normal;
+  text-transform: none;
+  font-style: italic;
+}

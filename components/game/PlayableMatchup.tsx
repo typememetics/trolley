@@ -1,22 +1,21 @@
 "use client";
 
-import { useRef, useState, useTransition, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useTransition, type ReactNode } from "react";
 import { StandingDefenseForm } from "@/components/player/StandingDefenseForm";
-import { directionForDecision } from "@/lib/game/rules";
-import type { RoundResult } from "@/lib/jev/play-round";
-import { TrolleyGame, type Matchup, type TrolleyGameHandle } from "./TrolleyGame";
+import { TrolleyGame, type Matchup } from "./TrolleyGame";
 
 /**
- * One round: the trolley, their defense against yours, and the button that hands both
- * to JEV. React orchestrates (ask JEV, then run the trolley once); the engine owns the
- * animation, and the trolley is the only verdict shown. Mount a fresh one (new `key`)
- * for each round.
+ * A drawn matchup before it becomes a round: the trolley, their defense against yours,
+ * and the button that records the round. Judging and the trolley run happen on the
+ * round's own page. Mount a fresh one (new `key`) for each draw.
  */
-export function PlayableMatchup({ matchup, play, theirs, defense, children }: {
+export function PlayableMatchup({ matchup, judge, theirs, defense, children }: {
   matchup: Matchup;
-  /** Judges this round against the opponent the server drew; null while there is none. */
-  play: (() => Promise<RoundResult>) | null;
+  /**
+   * Records a round against the opponent the server drew and navigates to it, or returns
+   * why it couldn't. Null while there is no opponent.
+   */
+  judge: (() => Promise<string | undefined>) | null;
   /** The opponent's side, rendered on the server. */
   theirs: ReactNode;
   /** The player's saved standing defense. */
@@ -24,55 +23,39 @@ export function PlayableMatchup({ matchup, play, theirs, defense, children }: {
   /** Shown between the trolley and the matchup. */
   children?: ReactNode;
 }) {
-  const game = useRef<TrolleyGameHandle>(null);
   // A saved defense is showing (not missing, not mid-edit): there is something to judge.
   const [ready, setReady] = useState(defense !== null);
-  // Set once JEV has ruled; from then on this round is over, whatever happens next.
-  const [decided, setDecided] = useState(false);
-  const [landed, setLanded] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [judging, startJudging] = useTransition();
-  const router = useRouter();
-  const [drawing, startDrawing] = useTransition();
+  // Stays pending through the navigation to the round, so the button can't record a second one
+  const [starting, startRound] = useTransition();
 
-  async function runRound(): Promise<string | null> {
-    if (!play || decided) return null;
-    let result: RoundResult;
-    try {
-      result = await play();
-    } catch {
-      // Network failure or a page left open across a deploy. No ruling, so no trolley.
-      return "JEV could not be reached. Try again.";
-    }
-    if (!result.ok) return result.error;
-
-    setDecided(true);
-    try {
-      await game.current?.startTrolley(directionForDecision(result.decision));
-    } finally {
-      setLanded(true);
-    }
-    return null;
+  function onJudge() {
+    if (!judge) return;
+    setError(null);
+    startRound(async () => {
+      try {
+        const failure = await judge();
+        if (failure) setError(failure);
+      } catch {
+        // Network failure or a page left open across a deploy
+        setError("The round could not be started. Try again.");
+      }
+    });
   }
 
   return (
     <>
-      <TrolleyGame ref={game} matchup={matchup}/>
+      <TrolleyGame matchup={matchup}/>
       {children}
       <div className="matchup">
         {theirs}
         <StandingDefenseForm defense={defense} onReadyChange={setReady}/>
       </div>
-      {play && (
+      {judge && (
         <div className="judge">
-          {landed
-            // Re-renders the page on the server, which draws a new opponent and remounts this round
-            ? <button type="button" disabled={drawing} onClick={() => startDrawing(() => router.refresh())}>
-                {drawing ? "Drawing..." : "Next opponent"}
-              </button>
-            : <button type="button" disabled={!ready || judging || decided} onClick={() => startJudging(async () => setError(await runRound()))}>
-                {judging || decided ? "Judging..." : "Judge"}
-              </button>}
+          <button type="button" disabled={!ready || starting} onClick={onJudge}>
+            {starting ? "Judging..." : "Judge"}
+          </button>
           {error && <p className="defense-error" role="alert">{error}</p>}
         </div>
       )}
