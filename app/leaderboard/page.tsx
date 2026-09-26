@@ -14,15 +14,7 @@ export const metadata: Metadata = {
 
 const percent = (rate: number) => `${(rate * 100).toFixed(1)}%`;
 
-/** "survived / rounds", or a dash when the player has never been on that side. */
-function Tally({ survived, rounds }: { survived: number; rounds: number }) {
-  return rounds === 0 ? <span className="none">—</span> : <>{survived} / {rounds}</>;
-}
-
-/**
- * Who survives JEV most often, derived from resolved rounds on every request. Rounds are
- * shown next to every rate, so 1 / 1 never passes for 80 / 100.
- */
+/** Who survives JEV most often, derived from resolved rounds on every request. */
 export default async function LeaderboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/");
@@ -45,9 +37,6 @@ export default async function LeaderboardPage() {
                 <th scope="col">#</th>
                 <th scope="col" className="player">Player</th>
                 <th scope="col">Survival</th>
-                <th scope="col" title="On the lower track, after pressing Judge">Attack</th>
-                <th scope="col" title="On the upper track, drawn as someone's opponent">Defense</th>
-                <th scope="col">Rounds</th>
               </tr>
             </thead>
             <tbody>
@@ -64,13 +53,7 @@ export default async function LeaderboardPage() {
                         {you && <span className="you-tag">You</span>}
                       </span>
                     </th>
-                    <td>
-                      <Tally survived={entry.survived} rounds={entry.rounds}/>
-                      <span className="rate">{percent(entry.survivalRate)}</span>
-                    </td>
-                    <td><Tally survived={entry.attackSurvived} rounds={entry.attackRounds}/></td>
-                    <td><Tally survived={entry.defenseSurvived} rounds={entry.defenseRounds}/></td>
-                    <td className="rounds">{entry.rounds}</td>
+                    <td className="rate">{percent(entry.survivalRate)}</td>
                   </tr>
                 );
               })}

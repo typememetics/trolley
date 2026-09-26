@@ -34,9 +34,7 @@
 .leaderboard .player { width: 100%; text-align: left; font-weight: normal; }
 .leaderboard .who { display: inline-flex; align-items: center; gap: 8px; }
 .leaderboard .player img { border-radius: 50%; flex: none; }
-.leaderboard .rate { display: inline-block; min-width: 4.5em; margin-left: 8px; font-weight: bold; }
-.leaderboard .rounds { font-weight: bold; }
-.leaderboard .none { color: #888; }
+.leaderboard .rate { font-weight: bold; }
 
 /* The signed-in player's row: noticed, not promoted */
 .leaderboard tr.you { background: #f4f0e8; }
