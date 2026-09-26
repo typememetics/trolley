@@ -36,7 +36,7 @@ export default async function LeaderboardPage() {
       <nav className="leaderboard-nav"><Link href="/">Back to game</Link></nav>
 
       {entries.length === 0 ? (
-        <p className="notice">No one has survived JEV yet.</p>
+        <p className="notice">No one has survived AGI yet.</p>
       ) : (
         <div className="leaderboard-table">
           <table>

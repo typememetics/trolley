@@ -74,10 +74,10 @@ export function RoundPlayback({ matchup, initial, resolve, children }: {
       <TrolleyGame ref={game} matchup={matchup}/>
       {children}
       <div className="judge">
-        {pending && !error && <p className="verdict" role="status">JEV is deciding...</p>}
+        {pending && !error && <p className="verdict" role="status">AGI is deciding...</p>}
         {outcome.status === "resolved" && landed && (
           <p className="verdict" role="status">
-            {outcome.decision === "flip" ? "JEV flipped the switch." : "JEV left the switch alone."}
+            {outcome.decision === "flip" ? "AGI flipped the switch." : "AGI left the switch alone."}
           </p>
         )}
         {outcome.status === "failed" && <p className="defense-error" role="alert">{outcome.message} Nobody was hit.</p>}

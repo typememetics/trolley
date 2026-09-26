@@ -53,9 +53,9 @@ export async function resolveRoundFor(
 }
 
 const FAILURE_MESSAGES: Record<RoundFailureCode, string> = {
-  jev_failed: "JEV could not decide this round.",
-  invalid_jev_result: "JEV could not decide this round.",
-  judging_timeout: "JEV never finished deciding this round.",
+  jev_failed: "AGI could not decide this round.",
+  invalid_jev_result: "AGI could not decide this round.",
+  judging_timeout: "AGI never finished deciding this round.",
 };
 
 /** What the browser may know about a round's progress. */

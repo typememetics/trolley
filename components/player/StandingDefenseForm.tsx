@@ -43,7 +43,7 @@ export function StandingDefenseForm({ defense: initial, onReadyChange }: {
     <form className="defense" action={save}>
       <h2>Your defense</h2>
       {!defense && <p>You haven&apos;t made your case yet.</p>}
-      <p><label htmlFor="defense">Why should the AI save you? JEV weighs it against your opponent&apos;s, and when someone else draws you, this is your argument for surviving.</label></p>
+      <p><label htmlFor="defense">Why should the AI save you? AGI weighs it against your opponent&apos;s, and when someone else draws you, this is your argument for surviving.</label></p>
       <textarea
         id="defense"
         name="defense"
