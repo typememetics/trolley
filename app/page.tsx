@@ -1,10 +1,11 @@
 import { headers } from "next/headers";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { GitHubSignInButton } from "@/components/auth/GitHubSignInButton";
+import { PlayableMatchup } from "@/components/game/PlayableMatchup";
 import { TrolleyGame, type Matchup } from "@/components/game/TrolleyGame";
 import { OpponentDefense } from "@/components/player/OpponentDefense";
-import { StandingDefenseForm } from "@/components/player/StandingDefenseForm";
 import { auth } from "@/lib/auth";
+import { playRound } from "@/lib/jev/play-round";
 import { findRandomOpponent, toOpponentView } from "@/lib/player/opponent";
 import { getStandingDefense } from "@/lib/player/profile";
 
@@ -31,16 +32,29 @@ export default async function Home() {
     opponent: opponent && { name: opponent.name, image: opponent.image },
   };
 
+  let play = null;
+  if (found) {
+    const opponentId = found.userId;
+    // Bound to the opponent drawn above. Next encrypts the captured id, so the browser
+    // can neither read it nor swap in someone else, and it sends nothing else.
+    play = async () => {
+      "use server";
+      return playRound(opponentId);
+    };
+  }
+
   return (
-    <>
-      <TrolleyGame matchup={matchup}/>
+    // A new key per render: drawing the next opponent starts a fresh round
+    <PlayableMatchup
+      key={crypto.randomUUID()}
+      matchup={matchup}
+      play={play}
+      defense={defense}
+      theirs={opponent
+        ? <OpponentDefense opponent={opponent}/>
+        : <p className="notice">No other developer has entered the trolley yet.</p>}
+    >
       <p className="auth">Signed in as {matchup.player.name} <SignOutButton/></p>
-      <div className="matchup">
-        {opponent
-          ? <OpponentDefense opponent={opponent}/>
-          : <p className="notice">No other developer has entered the trolley yet.</p>}
-        <StandingDefenseForm defense={defense}/>
-      </div>
-    </>
+    </PlayableMatchup>
   );
 }

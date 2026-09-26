@@ -1,5 +1,8 @@
 export type TrackDirection = "up" | "down";
 
+/** What JEV decides about the lever. The game, not JEV, turns it into a track direction. */
+export type LeverDecision = "flip" | "dont_flip";
+
 /** [x, y] in tracks.png pixel space. */
 export type Point = readonly [number, number];
 

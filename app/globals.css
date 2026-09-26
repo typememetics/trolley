@@ -67,6 +67,8 @@ figcaption {
 .defense button { font: inherit; cursor: pointer; margin: 0 3px; }
 .defense .defense-error { color: #A52F2F; font-style: normal; }
 
+.defense button:disabled { cursor: default; }
+
 /* The two cases side by side: theirs and yours */
 .matchup {
   position: relative;
@@ -81,3 +83,24 @@ figcaption {
 .matchup > * { flex: 1 1 280px; max-width: 520px; }
 .matchup .notice { margin-top: 16px; }
 .defense .defense-who { font-style: normal; }
+
+/* The one big button under the matchup: hand both defenses to JEV */
+.judge {
+  position: relative;
+  z-index: 5;
+  margin: 24px 0 0;
+  text-align: center;
+}
+.judge button {
+  font: bold clamp(22px, 4vw, 36px) Georgia, "Times New Roman", serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 12px 56px;
+  color: var(--bg);
+  background: var(--ink);
+  border: 3px solid var(--ink);
+  cursor: pointer;
+}
+.judge button:hover:not(:disabled) { color: var(--ink); background: var(--bg); }
+.judge button:disabled { opacity: 0.4; cursor: default; }
+.judge .defense-error { margin: 8px 0 0; color: #A52F2F; font-size: 14px; }

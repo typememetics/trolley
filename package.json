@@ -18,11 +18,13 @@
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.7.6",
     "@libsql/client": "^0.18.0",
+    "@typesafe-ai/sdk": "^0.6.0",
     "better-auth": "^1.7.6",
     "drizzle-orm": "^0.45.3",
     "next": "^16.3.6",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@types/node": "^24.13.6",
