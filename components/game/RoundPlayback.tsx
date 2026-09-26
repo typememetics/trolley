@@ -10,8 +10,6 @@ import { TrolleyGame, type Matchup, type TrolleyGameHandle } from "./TrolleyGame
 /** How often to ask again while JEV is deciding. The server's stale rule guarantees this ends. */
 const POLL_MS = 2000;
 
-const percent = (p: number) => `${Math.round(p * 100)}%`;
-
 /**
  * A stored round, played out. Until it has a verdict this keeps asking the server to
  * resolve it; that is safe to repeat (remounts, refreshes, other tabs) because the
@@ -80,10 +78,6 @@ export function RoundPlayback({ matchup, initial, resolve, children }: {
         {outcome.status === "resolved" && landed && (
           <p className="verdict" role="status">
             {outcome.decision === "flip" ? "JEV flipped the switch." : "JEV left the switch alone."}
-            <small>
-              flip {percent(outcome.probabilities.flip)} · don&apos;t flip {percent(outcome.probabilities.dont_flip)}
-              {" · "}confidence {percent(outcome.confidence)} · {outcome.model}
-            </small>
           </p>
         )}
         {outcome.status === "failed" && <p className="defense-error" role="alert">{outcome.message} Nobody was hit.</p>}

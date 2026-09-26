@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { StandingDefenseForm } from "@/components/player/StandingDefenseForm";
+import type { CreateRoundResult } from "@/lib/round/create-round";
 import { TrolleyGame, type Matchup } from "./TrolleyGame";
 
 /**
@@ -11,11 +13,8 @@ import { TrolleyGame, type Matchup } from "./TrolleyGame";
  */
 export function PlayableMatchup({ matchup, judge, theirs, defense, children }: {
   matchup: Matchup;
-  /**
-   * Records a round against the opponent the server drew and navigates to it, or returns
-   * why it couldn't. Null while there is no opponent.
-   */
-  judge: (() => Promise<string | undefined>) | null;
+  /** Records a round against the opponent the server drew. Null while there is no opponent. */
+  judge: (() => Promise<CreateRoundResult>) | null;
   /** The opponent's side, rendered on the server. */
   theirs: ReactNode;
   /** The player's saved standing defense. */
@@ -28,18 +27,21 @@ export function PlayableMatchup({ matchup, judge, theirs, defense, children }: {
   const [error, setError] = useState<string | null>(null);
   // Stays pending through the navigation to the round, so the button can't record a second one
   const [starting, startRound] = useTransition();
+  const router = useRouter();
 
   function onJudge() {
     if (!judge) return;
     setError(null);
     startRound(async () => {
+      let created: CreateRoundResult;
       try {
-        const failure = await judge();
-        if (failure) setError(failure);
+        created = await judge();
       } catch {
         // Network failure or a page left open across a deploy
-        setError("The round could not be started. Try again.");
+        return setError("The round could not be started. Try again.");
       }
+      if (!created.ok) return setError(created.error);
+      router.push(`/round/${created.roundId}`);
     });
   }
 

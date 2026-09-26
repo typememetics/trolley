@@ -1,5 +1,4 @@
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { GitHubSignInButton } from "@/components/auth/GitHubSignInButton";
 import { PlayableMatchup } from "@/components/game/PlayableMatchup";
@@ -38,12 +37,10 @@ export default async function Home() {
     const opponentId = found.userId;
     // Bound to the opponent drawn above. Next encrypts the captured id, so the browser
     // can neither read it nor swap in someone else, and it sends nothing else.
-    // Only records the round; JEV is asked on the round's own page.
+    // Only records the round; JEV is asked on the round's own page, where the browser goes next.
     judge = async () => {
       "use server";
-      const created = await createRound(opponentId);
-      if (!created.ok) return created.error;
-      redirect(`/round/${created.roundId}`);
+      return createRound(opponentId);
     };
   }
 

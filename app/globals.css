@@ -112,11 +112,3 @@ figcaption {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.judge .verdict small {
-  display: block;
-  margin-top: 4px;
-  font-size: 13px;
-  letter-spacing: normal;
-  text-transform: none;
-  font-style: italic;
-}
