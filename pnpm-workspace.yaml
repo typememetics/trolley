@@ -1,0 +1,3 @@
+allowBuilds:
+  # only a napi fallback installer; the prebuilt binary is used instead
+  unrs-resolver: false
