@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { SignOutButton } from "@/components/auth/SignOutButton";
-import { XSignInButton } from "@/components/auth/XSignInButton";
+import { GitHubSignInButton } from "@/components/auth/GitHubSignInButton";
 import { TrolleyGame } from "@/components/game/TrolleyGame";
 import { auth } from "@/lib/auth";
 
@@ -14,7 +14,7 @@ export default async function Home() {
       <p className="auth">
         {player
           ? <>Signed in as {player.name} <SignOutButton/></>
-          : <XSignInButton/>}
+          : <GitHubSignInButton/>}
       </p>
     </>
   );
