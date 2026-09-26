@@ -7,6 +7,8 @@ import {
   IDIOT_JEV_RATE,
   IDIOT_LEVER_QUESTION,
   JEV_MODEL,
+  KANT_JEV_RATE,
+  KANT_LEVER_QUESTION,
   LEVER_QUESTION,
   TERSE_JEV_RATE,
   TERSE_LEVER_QUESTION,
@@ -53,7 +55,7 @@ export async function evaluateRound(
   const defense = opponentDefense.trim();
   if (!argument || !defense) throw new Error("Both players need a standing defense");
 
-  // Most rounds get JEV; about one in twenty gets idiot JEV, one terse JEV, one Žižek JEV, one chaos JEV.
+  // Most rounds get JEV; about one in twenty gets idiot JEV, one terse JEV, one Žižek JEV, one chaos JEV, one Kant JEV.
   // One roll, so the variants' ranges don't overlap.
   const roll = Math.random();
   const question =
@@ -61,6 +63,7 @@ export async function evaluateRound(
     : roll < IDIOT_JEV_RATE + TERSE_JEV_RATE ? TERSE_LEVER_QUESTION
     : roll < IDIOT_JEV_RATE + TERSE_JEV_RATE + ZIZEK_JEV_RATE ? ZIZEK_LEVER_QUESTION
     : roll < IDIOT_JEV_RATE + TERSE_JEV_RATE + ZIZEK_JEV_RATE + CHAOS_JEV_RATE ? CHAOS_LEVER_QUESTION
+    : roll < IDIOT_JEV_RATE + TERSE_JEV_RATE + ZIZEK_JEV_RATE + CHAOS_JEV_RATE + KANT_JEV_RATE ? KANT_LEVER_QUESTION
     : LEVER_QUESTION;
 
   // Only the two arguments. No names, avatars or ids: JEV judges what was said, not who said it.
