@@ -16,12 +16,14 @@ const POLL_MS = 2000;
  * database lets exactly one request ask JEV. Once resolved, the trolley runs the way the
  * stored decision says, every time the page loads. A failed round never moves it.
  */
-export function RoundPlayback({ matchup, initial, resolve, children }: {
+export function RoundPlayback({ matchup, initial, resolve, onNext, children }: {
   matchup: Matchup;
   /** Where the round stood when the page rendered. */
   initial: RoundOutcome;
   /** Resolves this round if it has no verdict, and reports where it stands. Never re-judges. */
   resolve: () => Promise<ResolveRoundResult>;
+  /** Draws the next opponent. Defaults to going to the home page. */
+  onNext?: () => void;
   /** Shown between the trolley and the verdict. */
   children?: ReactNode;
 }) {
@@ -84,7 +86,7 @@ export function RoundPlayback({ matchup, initial, resolve, children }: {
         {error && <p className="defense-error" role="alert">{error}</p>}
         {(over || error) && (
           // The home page draws a new opponent; this round stays as it is
-          <button type="button" disabled={drawing} onClick={() => startDrawing(() => router.push("/"))}>
+          <button type="button" disabled={drawing} onClick={() => startDrawing(onNext ?? (() => router.push("/")))}>
             {drawing ? "Drawing..." : "Next opponent"}
           </button>
         )}

@@ -3,7 +3,10 @@ import { getOpponentDefense } from "@/lib/player/opponent";
 import { getStandingDefense } from "@/lib/player/profile";
 import { insertRound } from "./queries";
 
-export type CreateRoundResult = { ok: true; roundId: string } | { ok: false; error: string };
+export type CreateRoundResult =
+  /** `playerArgument` is the player's own snapshot, so the page can show what is being judged. */
+  | { ok: true; roundId: string; playerArgument: string }
+  | { ok: false; error: string };
 
 /**
  * Snapshot a matchup into a new round, without asking JEV anything. Both arguments are
@@ -28,5 +31,5 @@ export async function createRoundFor(playerUserId: string, opponentUserId: strin
     playerArgumentSnapshot: playerArgument,
     opponentDefenseSnapshot: opponentDefense,
   });
-  return { ok: true, roundId: created.id };
+  return { ok: true, roundId: created.id, playerArgument };
 }

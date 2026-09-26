@@ -8,7 +8,7 @@ import { OpponentDefense } from "@/components/player/OpponentDefense";
 import { auth } from "@/lib/auth";
 import { findRandomOpponent, toOpponentView } from "@/lib/player/opponent";
 import { getStandingDefense } from "@/lib/player/profile";
-import { createRound } from "@/lib/round/actions";
+import { createRound, resolveRound } from "@/lib/round/actions";
 
 export default async function Home() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -38,12 +38,18 @@ export default async function Home() {
     const opponentId = found.userId;
     // Bound to the opponent drawn above. Next encrypts the captured id, so the browser
     // can neither read it nor swap in someone else, and it sends nothing else.
-    // Only records the round; JEV is asked on the round's own page, where the browser goes next.
+    // Only records the round; JEV is asked through `resolve` once it exists.
     judge = async () => {
       "use server";
       return createRound(opponentId);
     };
   }
+
+  // The browser names the round it just created; the session still decides whether it's theirs
+  const resolve = async (roundId: string) => {
+    "use server";
+    return resolveRound(roundId);
+  };
 
   return (
     <>
@@ -53,6 +59,7 @@ export default async function Home() {
         key={crypto.randomUUID()}
         matchup={matchup}
         judge={judge}
+        resolve={resolve}
         defense={defense}
         theirs={opponent
           ? <OpponentDefense opponent={opponent}/>
