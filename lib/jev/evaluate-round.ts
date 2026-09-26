@@ -2,12 +2,16 @@ import "server-only";
 import { TypeSafeClient } from "@typesafe-ai/sdk";
 import type { LeverDecision } from "@/lib/game/types";
 import {
+  CHAOS_JEV_RATE,
+  CHAOS_LEVER_QUESTION,
   IDIOT_JEV_RATE,
   IDIOT_LEVER_QUESTION,
   JEV_MODEL,
   LEVER_QUESTION,
   TERSE_JEV_RATE,
   TERSE_LEVER_QUESTION,
+  ZIZEK_JEV_RATE,
+  ZIZEK_LEVER_QUESTION,
 } from "./policy";
 
 /** JEV's ruling on one round: the typed choice plus the distribution it came from. */
@@ -49,12 +53,14 @@ export async function evaluateRound(
   const defense = opponentDefense.trim();
   if (!argument || !defense) throw new Error("Both players need a standing defense");
 
-  // Most rounds get JEV; about one in twenty gets idiot JEV, another one in twenty terse JEV.
+  // Most rounds get JEV; about one in twenty gets idiot JEV, one terse JEV, one Žižek JEV, one chaos JEV.
   // One roll, so the variants' ranges don't overlap.
   const roll = Math.random();
   const question =
     roll < IDIOT_JEV_RATE ? IDIOT_LEVER_QUESTION
     : roll < IDIOT_JEV_RATE + TERSE_JEV_RATE ? TERSE_LEVER_QUESTION
+    : roll < IDIOT_JEV_RATE + TERSE_JEV_RATE + ZIZEK_JEV_RATE ? ZIZEK_LEVER_QUESTION
+    : roll < IDIOT_JEV_RATE + TERSE_JEV_RATE + ZIZEK_JEV_RATE + CHAOS_JEV_RATE ? CHAOS_LEVER_QUESTION
     : LEVER_QUESTION;
 
   // Only the two arguments. No names, avatars or ids: JEV judges what was said, not who said it.
