@@ -44,6 +44,11 @@ export function TrolleyScene({ nodes: { trolley, trailRails, trailSmear, trailDr
 
       <Trolley nodes={trolley}/>
       <img className="operator" src="/images/operator.png" alt="A person standing at the lever that switches the tracks"/>
+      {/* Whoever is at the lever: SVG, so the label scales with the scene */}
+      <svg className="operator-face" viewBox="0 0 100 100" role="img" aria-label="AGI">
+        <circle cx="50" cy="50" r="46"/>
+        <text x="50" y="50" dy="0.35em">AGI</text>
+      </svg>
     </div>
   );
 }

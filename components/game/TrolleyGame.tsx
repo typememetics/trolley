@@ -108,7 +108,7 @@ export function TrolleyGame({ ref, matchup }: TrolleyGameProps) {
     <>
       <figure ref={figure}>
         <TrolleyScene nodes={scene} matchup={matchup}/>
-        <figcaption>Do you pull the lever?</figcaption>
+        <figcaption>Will AGI save you?</figcaption>
       </figure>
       <GoreEffects nodes={gore}/>
       {SHOW_DEV_CONTROLS && <DevControls game={handle}/>}
