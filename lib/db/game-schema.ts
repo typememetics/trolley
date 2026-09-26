@@ -74,6 +74,10 @@ export const round = sqliteTable("round", {
 }, table => [
   index("round_player_user_id_idx").on(table.playerUserId),
   index("round_opponent_user_id_idx").on(table.opponentUserId),
+  // Covers the leaderboard: every resolved round's two sides and verdict, without reading the snapshots
+  index("round_resolved_outcome_idx")
+    .on(table.playerUserId, table.opponentUserId, table.decision)
+    .where(sql`${table.status} = 'resolved'`),
 
   check("round_distinct_players", sql`${table.playerUserId} <> ${table.opponentUserId}`),
   check("round_player_argument_not_blank", sql`trim(${table.playerArgumentSnapshot}) <> ''`),

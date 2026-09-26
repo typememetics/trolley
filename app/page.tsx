@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import Link from "next/link";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { GitHubSignInButton } from "@/components/auth/GitHubSignInButton";
 import { PlayableMatchup } from "@/components/game/PlayableMatchup";
@@ -55,7 +56,9 @@ export default async function Home() {
         ? <OpponentDefense opponent={opponent}/>
         : <p className="notice">No other developer has entered the trolley yet.</p>}
     >
-      <p className="auth">Signed in as {matchup.player.name} <SignOutButton/></p>
+      <p className="auth">
+        Signed in as {matchup.player.name} <SignOutButton/> · <Link href="/leaderboard">Leaderboard</Link>
+      </p>
     </PlayableMatchup>
   );
 }

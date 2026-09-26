@@ -112,3 +112,4 @@ figcaption {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+.auth a { color: inherit; }

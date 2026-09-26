@@ -1,0 +1,1 @@
+CREATE INDEX `round_resolved_outcome_idx` ON `round` (`player_user_id`,`opponent_user_id`,`decision`) WHERE "round"."status" = 'resolved';
