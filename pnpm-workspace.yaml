@@ -1,3 +1,5 @@
 allowBuilds:
   # only a napi fallback installer; the prebuilt binary is used instead
   unrs-resolver: false
+  # drizzle-kit's bundler; the postinstall only re-checks the platform binary package
+  esbuild: false

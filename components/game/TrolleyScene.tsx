@@ -13,11 +13,18 @@ export interface SceneRefs {
   victims: Record<TrackDirection, VictimRefs>;
 }
 
+/** No usable picture leaves the cartoon head in place. */
+const faceOf = (who?: PlayerIdentity) => who?.image ? { src: who.image, name: who.name } : undefined;
+
 /**
  * The illustration, laid out in the coordinate space of tracks.png (1448 × 1086).
  * Rendered once; everything that moves is driven by the trolley engine.
  */
-export function TrolleyScene({ nodes: { trolley, trailRails, trailSmear, trailDrops, victims }, player }: { nodes: SceneRefs; player?: PlayerIdentity }) {
+export function TrolleyScene({ nodes: { trolley, trailRails, trailSmear, trailDrops, victims }, player, opponent }: {
+  nodes: SceneRefs;
+  player?: PlayerIdentity;
+  opponent?: PlayerIdentity;
+}) {
   const viewBox = `0 0 ${SCENE_WIDTH} ${SCENE_HEIGHT}`;
   return (
     <div className="scene">
@@ -25,11 +32,11 @@ export function TrolleyScene({ nodes: { trolley, trailRails, trailSmear, trailDr
       <svg className="trail trail-rails" viewBox={viewBox} aria-hidden="true"><path ref={trailRails}/></svg>
       <svg className="trail trail-smear" viewBox={viewBox} aria-hidden="true"><path ref={trailSmear}/><g ref={trailDrops} className="drops"/></svg>
 
-      {/* One person tied to the upper (diverted) branch: the signed-in player, if any */}
-      <Victim direction="up" nodes={victims.up} face={player?.image ? { src: player.image, name: player.name } : undefined}/>
+      {/* The upper (diverted) branch: the opponent, if one was found */}
+      <Victim direction="up" nodes={victims.up} face={faceOf(opponent)}/>
 
-      {/* One person tied to the lower (main) branch */}
-      <Victim direction="down" nodes={victims.down}/>
+      {/* The lower (main) branch, where the trolley goes unless the lever is pulled: the signed-in player */}
+      <Victim direction="down" nodes={victims.down} face={faceOf(player)}/>
 
       <Trolley nodes={trolley}/>
       <img className="operator" src="/images/operator.png" alt="A person standing at the lever that switches the tracks"/>

@@ -33,3 +33,36 @@ figcaption {
   font-size: 15px;
 }
 .auth button { font: inherit; cursor: pointer; margin-left: 6px; }
+
+.notice {
+  position: relative;
+  z-index: 5;
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 14px;
+  font-style: italic;
+}
+
+.defense {
+  position: relative;
+  z-index: 5;
+  width: min(100%, 560px);
+  margin: 16px 0 0;
+  text-align: center;
+}
+.defense h2 { margin: 0 0 4px; font-size: 18px; letter-spacing: 0.05em; text-transform: uppercase; }
+.defense p { margin: 0 0 8px; font-size: 14px; font-style: italic; }
+.defense blockquote { margin: 0 0 8px; font-size: 16px; font-style: italic; }
+.defense blockquote::before { content: "\201C"; }
+.defense blockquote::after { content: "\201D"; }
+.defense textarea {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 8px;
+  font: inherit;
+  border: 2px solid var(--ink);
+  resize: vertical;
+}
+.defense button { font: inherit; cursor: pointer; margin: 0 3px; }
+.defense .defense-error { color: #A52F2F; font-style: normal; }

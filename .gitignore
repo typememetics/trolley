@@ -19,3 +19,7 @@ result
 # misc
 .DS_Store
 *.log
+
+# local libSQL databases
+*.db
+*.db-*

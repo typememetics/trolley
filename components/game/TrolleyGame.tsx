@@ -15,7 +15,7 @@ export interface TrolleyGameHandle {
   reset(): void;
 }
 
-/** Who is tied to the upper track. Deliberately not an auth session: just what the scene draws. */
+/** Someone tied to a track. Deliberately not an auth session or a database row: just what the scene draws. */
 export interface PlayerIdentity {
   name: string;
   image: string | null;
@@ -23,7 +23,10 @@ export interface PlayerIdentity {
 
 interface TrolleyGameProps {
   ref?: Ref<TrolleyGameHandle>;
+  /** The signed-in player, on the lower (main) track the trolley takes by default. */
   player?: PlayerIdentity;
+  /** Their opponent, on the upper (diverted) track. */
+  opponent?: PlayerIdentity;
 }
 
 const SHOW_DEV_CONTROLS = process.env.NODE_ENV === "development";
@@ -63,7 +66,7 @@ function victimElements(nodes: VictimRefs): VictimElements {
   return { body: must(nodes.body), blood: must(nodes.blood), pool: must(nodes.pool), gore: must(nodes.gore) };
 }
 
-export function TrolleyGame({ ref, player }: TrolleyGameProps) {
+export function TrolleyGame({ ref, player, opponent }: TrolleyGameProps) {
   const [{ figure, scene, gore }] = useState(createGameRefs);
   const engine = useRef<TrolleyEngine>(null);
 
@@ -99,7 +102,7 @@ export function TrolleyGame({ ref, player }: TrolleyGameProps) {
   return (
     <>
       <figure ref={figure}>
-        <TrolleyScene nodes={scene} player={player}/>
+        <TrolleyScene nodes={scene} player={player} opponent={opponent}/>
         <figcaption>Do you pull the lever?</figcaption>
       </figure>
       <GoreEffects nodes={gore}/>
