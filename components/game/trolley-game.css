@@ -78,6 +78,30 @@
   transition: opacity 0.2s;
 }
 .person-blood.on { opacity: 1; }
+
+/* The player's picture pasted over the head of whichever body is showing.
+   It shares the person's left/top anchor; margins (always % of the scene's width)
+   move it onto the head, measured in the sprites' 1536 × 1024 pixel space:
+     alive: head centre (1077, 287), Ø 196 at 30% width, anchor (814, 553)
+     dead:  head centre (1056, 470), Ø 240 at 25% width, anchor (690, 640) */
+.scene .victim-avatar {
+  width: 3.83%;
+  aspect-ratio: 1;
+  margin: -5.2% 0 0 5.14%;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #111;
+  background: #fff;
+  z-index: 2;
+}
+.scene .person.dead + .victim-avatar {
+  width: 3.91%;
+  margin: -2.77% 0 0 5.96%;
+  transform: translate(-50%, -50%) rotate(-24deg);
+}
+/* .scene img sets display, which would otherwise beat the hidden attribute */
+.scene .victim-avatar[hidden] { display: none; }
 .person-blood .pool ellipse { transform-box: fill-box; transform-origin: center;
                           animation: pool-spread 1.4s ease-out both; }
 @keyframes pool-spread { from { transform: scale(0); } }

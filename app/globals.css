@@ -8,6 +8,7 @@ body {
   min-height: 100vh;
   display: grid;
   place-items: start center;
+  align-content: start;
   background: var(--bg);
   color: var(--ink);
   font-family: Georgia, "Times New Roman", serif;
@@ -23,3 +24,12 @@ figcaption {
   margin-top: 8px;
   font-style: italic;
 }
+
+.auth {
+  position: relative;
+  z-index: 5;
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 15px;
+}
+.auth button { font: inherit; cursor: pointer; margin-left: 6px; }

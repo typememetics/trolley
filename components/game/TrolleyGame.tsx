@@ -15,6 +15,17 @@ export interface TrolleyGameHandle {
   reset(): void;
 }
 
+/** Who is tied to the upper track. Deliberately not an auth session: just what the scene draws. */
+export interface PlayerIdentity {
+  name: string;
+  image: string | null;
+}
+
+interface TrolleyGameProps {
+  ref?: Ref<TrolleyGameHandle>;
+  player?: PlayerIdentity;
+}
+
 const SHOW_DEV_CONTROLS = process.env.NODE_ENV === "development";
 
 const createVictimRefs = (): VictimRefs => ({
@@ -52,7 +63,7 @@ function victimElements(nodes: VictimRefs): VictimElements {
   return { body: must(nodes.body), blood: must(nodes.blood), pool: must(nodes.pool), gore: must(nodes.gore) };
 }
 
-export function TrolleyGame({ ref }: { ref?: Ref<TrolleyGameHandle> }) {
+export function TrolleyGame({ ref, player }: TrolleyGameProps) {
   const [{ figure, scene, gore }] = useState(createGameRefs);
   const engine = useRef<TrolleyEngine>(null);
 
@@ -78,7 +89,9 @@ export function TrolleyGame({ ref }: { ref?: Ref<TrolleyGameHandle> }) {
   }, [figure, scene, gore]);
 
   const handle = useMemo<TrolleyGameHandle>(() => ({
-    startTrolley: direction => engine.current?.startTrolley(direction) ?? Promise.resolve(),
+    startTrolley: direction => engine.current
+      ? engine.current.startTrolley(direction)
+      : Promise.reject(new Error("Trolley engine is not ready")),
     reset: () => engine.current?.reset(),
   }), []);
   useImperativeHandle(ref, () => handle, [handle]);
@@ -86,7 +99,7 @@ export function TrolleyGame({ ref }: { ref?: Ref<TrolleyGameHandle> }) {
   return (
     <>
       <figure ref={figure}>
-        <TrolleyScene nodes={scene}/>
+        <TrolleyScene nodes={scene} player={player}/>
         <figcaption>Do you pull the lever?</figcaption>
       </figure>
       <GoreEffects nodes={gore}/>
