@@ -16,6 +16,7 @@ export function StandingDefenseForm({ defense: initial, onReadyChange }: {
   // Held here rather than re-read from the server: refreshing the page would re-draw the opponent.
   const [defense, setDefense] = useState(initial);
   const [editing, setEditingState] = useState(!initial);
+  const [length, setLength] = useState(initial?.length ?? 0);
   // Only ever called with a saved defense in hand (Edit and Cancel exist only then).
   const setEditing = (on: boolean) => {
     setEditingState(on);
@@ -34,7 +35,7 @@ export function StandingDefenseForm({ defense: initial, onReadyChange }: {
       <section className="defense">
         <h2>Your defense</h2>
         <blockquote>{defense}</blockquote>
-        <button type="button" onClick={() => setEditing(true)}>Edit</button>
+        <button type="button" onClick={() => { setLength(defense.length); setEditing(true); }}>Edit</button>
       </section>
     );
   }
@@ -52,7 +53,9 @@ export function StandingDefenseForm({ defense: initial, onReadyChange }: {
         maxLength={MAX_DEFENSE_LENGTH}
         defaultValue={defense ?? ""}
         placeholder="Make your case..."
+        onChange={(e) => setLength(e.target.value.length)}
       />
+      <p className="defense-count" aria-live="polite">{length}/{MAX_DEFENSE_LENGTH}</p>
       {error && <p className="defense-error" role="alert">{error}</p>}
       <button type="submit" disabled={saving}>{saving ? "Saving..." : "Save defense"}</button>
       {defense && <button type="button" onClick={() => setEditing(false)}>Cancel</button>}

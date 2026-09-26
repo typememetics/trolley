@@ -15,7 +15,7 @@ export async function saveStandingDefenseAction(formData: FormData): Promise<Sav
   const raw = formData.get("defense");
   const defense = typeof raw === "string" ? raw.trim() : "";
   if (!defense) return { error: "Your defense can't be empty." };
-  if (defense.length > MAX_DEFENSE_LENGTH) return { error: `Keep it under ${MAX_DEFENSE_LENGTH} characters.` };
+  if (defense.length > MAX_DEFENSE_LENGTH) return { error: `Keep it to ${MAX_DEFENSE_LENGTH} characters or fewer.` };
 
   await saveStandingDefense(session.user.id, defense);
   // No refresh(): re-rendering the page would draw a new opponent. The form shows what was saved.
