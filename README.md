@@ -1,6 +1,6 @@
 # Trolley
 
-**A runaway trolley. Two people on the tracks. An AI at the lever. You have 140 characters.**
+**AGI has done the expected-value math on your life. You have 140 characters to get the number up.**
 
 Play it at [trolley.typememetics.institute](https://trolley.typememetics.institute).
 
