@@ -12,9 +12,7 @@ export const metadata: Metadata = {
   title: "Leaderboard · The Trolley Problem",
 };
 
-const percent = (rate: number) => `${(rate * 100).toFixed(1)}%`;
-
-/** Elo interprets resolved history; survival remains visible as context. */
+/** Elo interprets resolved history. */
 export default async function LeaderboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/");
@@ -42,7 +40,6 @@ export default async function LeaderboardPage() {
                 <th scope="col">#</th>
                 <th scope="col" className="player">Player</th>
                 <th scope="col">Elo</th>
-                <th scope="col">Survival</th>
                 <th scope="col">Rounds</th>
               </tr>
             </thead>
@@ -61,7 +58,6 @@ export default async function LeaderboardPage() {
                       </span>
                     </th>
                     <td className="elo">{Math.round(entry.elo)}</td>
-                    <td>{percent(entry.survivalRate)}</td>
                     <td>{entry.rounds}</td>
                   </tr>
                 );
