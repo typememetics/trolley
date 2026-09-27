@@ -16,6 +16,7 @@ const dir = mkdtempSync(join(tmpdir(), "trolley-leaderboard-test-"));
 process.env.TURSO_DATABASE_URL = `file:${join(dir, "test.db")}`;
 delete process.env.TURSO_AUTH_TOKEN;
 
+let sequence = 0;
 const at = new Date("2026-01-01T00:00:00Z");
 
 async function users(...names: string[]) {
@@ -33,6 +34,7 @@ const inputs = (player: string, opponent: string) => ({
 async function resolved(player: string, opponent: string, decision: LeverDecision) {
   await db.insert(round).values({
     ...inputs(player, opponent),
+    id: String(++sequence).padStart(8, "0"),
     status: "resolved",
     decision,
     probabilityFlip: decision === "flip" ? 0.9 : 0.1,
@@ -135,26 +137,37 @@ describe("getLeaderboard", () => {
     });
   });
 
-  test("ranks by survival rate, then survived, then rounds, then name", async () => {
-    await users("ann", "bea", "Cal", "hal", "eve", "fay", "gus");
-    await resolved("ann", "fay", "flip");
-    await resolved("ann", "fay", "flip");
-    await resolved("bea", "fay", "flip");
-    await resolved("cal", "gus", "flip");
-    await resolved("eve", "fay", "flip");
-    await resolved("eve", "fay", "flip");
-    await resolved("eve", "hal", "dont_flip");
-    const board = await getLeaderboard();
+  test("Elo outranks survival percentage and candidates are chosen before survival stats", async () => {
+    await users("Expert", "Novice", "Opponent", "Other");
+    for (let i = 0; i < 8; i++) await resolved("expert", "opponent", "flip");
+    await resolved("expert", "opponent", "dont_flip");
+    await resolved("novice", "other", "flip");
+    const board = await getLeaderboard(1);
+    assert.equal(board[0].userId, "expert");
+    assert.equal(board[0].survivalRate, 8 / 9);
+    assert.equal(board[0].eloGames, 9);
+    assert.ok(board[0].elo > 1516);
+    assert.equal(board[0].image, null); // Seed players need no avatar to compete.
+  });
 
-    assert.deepEqual(board.map(e => `${e.name} ${e.survived}/${e.rounds}`), [
-      "ann 2/2", // 100%, more survivals than the other 100%s
-      "bea 1/1", // 100%, alphabetical regardless of case
-      "Cal 1/1",
-      "hal 1/1",
-      "eve 2/3",
-      "fay 0/5", // 0%, more rounds played
-      "gus 0/1",
-    ]);
+  test("name NOCASE and user id break exact Elo/game ties, including at the limit", async () => {
+    await users("Zed", "ann", "Bea", "x", "y", "z");
+    await resolved("zed", "x", "flip");
+    await resolved("ann", "y", "flip");
+    await resolved("bea", "z", "flip");
+    assert.deepEqual((await getLeaderboard(2)).map(e => e.userId), ["ann", "bea"]);
+    await db.run(sql`update user set name = 'ANN' where id = 'zed'`);
+    assert.deepEqual((await getLeaderboard(2)).map(e => e.userId), ["ann", "zed"]);
+  });
+
+  test("raw rating precedes games, and games precede canonical name", async () => {
+    await users("Alice", "Bob", "Carol");
+    const rows = await db.all<{ userId: string }>(leaderboardQuery([
+      { userId: "alice", elo: 1516.1, eloGames: 20 },
+      { userId: "bob", elo: 1516.2, eloGames: 1 },
+      { userId: "carol", elo: 1516.1, eloGames: 30 },
+    ], 3));
+    assert.deepEqual(rows.map(e => e.userId), ["bob", "carol", "alice"]);
   });
 
   test("limit keeps the top of the ranking", async () => {
@@ -170,7 +183,7 @@ describe("getLeaderboard", () => {
   });
 
   test("aggregates from the resolved-round index, never the round rows", async () => {
-    const plan = await db.all<{ detail: string }>(sql`explain query plan ${leaderboardQuery(100)}`);
+    const plan = await db.all<{ detail: string }>(sql`explain query plan ${leaderboardQuery([{ userId: "alice", elo: 1516, eloGames: 1 }], 100)}`);
     const details = plan.map(row => row.detail);
     assert.equal(details.filter(d => d.includes("COVERING INDEX round_resolved_outcome_idx")).length, 2, details.join("\n"));
   });

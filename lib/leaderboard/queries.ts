@@ -1,10 +1,16 @@
 import "server-only";
 import { sql } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { getCurrentEloRatings } from "@/lib/elo/queries";
 import type { LeaderboardEntry } from "./types";
 
-interface Row {
+interface Candidate {
   userId: string;
+  elo: number;
+  eloGames: number;
+}
+
+interface Row extends Candidate {
   name: string;
   image: string | null;
   rounds: number;
@@ -13,68 +19,55 @@ interface Row {
   attackSurvived: number;
 }
 
-/**
- * Who survives JEV most often, as a query over resolved rounds. Each resolved round is
- * two outcomes: the player on attack survives a flip, the opponent on defense survives a
- * dont_flip. Created, judging and failed rounds count for no one.
- *
- * Ranked by survival rate, then survivals, then rounds played, then name (and id, so equal
- * names still sort the same way every time).
- */
+/** Competitive order comes from full-precision Elo; survival remains a SQL projection. */
 export async function getLeaderboard(limit = 100): Promise<LeaderboardEntry[]> {
-  const rows = await db.all<Row>(leaderboardQuery(limit));
+  if (!Number.isInteger(limit) || limit < 0) throw new RangeError("Invalid leaderboard limit");
+  if (limit === 0) return [];
+  const ratings = await getCurrentEloRatings();
+  const ordered = [...ratings].map(([userId, state]) => ({ userId, elo: state.rating, eloGames: state.games }))
+    .sort((a, b) => b.elo - a.elo || b.eloGames - a.eloGames);
+  // Include the entire boundary tie: SQLite uses canonical names and NOCASE to finish it.
+  let end = Math.min(limit, ordered.length);
+  while (end < ordered.length && ordered[end].elo === ordered[end - 1].elo && ordered[end].eloGames === ordered[end - 1].eloGames) end++;
+  if (!end) return [];
+  const rows = await db.all<Row>(leaderboardQuery(ordered.slice(0, end), limit));
   return rows.map(row => ({
-    userId: row.userId,
-    name: row.name,
-    image: row.image,
-    rounds: row.rounds,
-    survived: row.survived,
+    ...row,
     flattened: row.rounds - row.survived,
-    survivalRate: row.survived / row.rounds,
-    attackRounds: row.attackRounds,
-    attackSurvived: row.attackSurvived,
+    survivalRate: row.rounds ? row.survived / row.rounds : 0,
     defenseRounds: row.rounds - row.attackRounds,
     defenseSurvived: row.survived - row.attackSurvived,
   }));
 }
 
 /**
- * The aggregation, all in the database. Both halves read only round_resolved_outcome_idx,
- * never the round rows with their snapshots. Exported for the query-plan test.
+ * One grouped query for the Elo candidates. JSON is one bound parameter even when
+ * many players tie. Survival still uses the existing covering resolved-outcome index.
+ * Name/id ordering and limit are applied BEFORE aggregation; there is no survival cutoff.
  */
-export const leaderboardQuery = (limit: number) => sql`
-  with outcome as (
+export const leaderboardQuery = (candidates: readonly Candidate[], limit: number) => sql`
+  with candidate as materialized (
+    select user.id as userId, user.name, user.image,
+      json_extract(value, '$.elo') as elo, json_extract(value, '$.eloGames') as eloGames
+    from json_each(${JSON.stringify(candidates)})
+    join user on user.id = json_extract(value, '$.userId')
+    order by elo desc, eloGames desc, user.name collate nocase asc, user.id asc
+    limit ${limit}
+  ), outcome as (
     select player_user_id as user_id, 1 as attack, decision = 'flip' as survived
-    from round where status = 'resolved'
+    from round indexed by round_resolved_outcome_idx
+    where status = 'resolved' and player_user_id in (select userId from candidate)
     union all
     select opponent_user_id as user_id, 0 as attack, decision = 'dont_flip' as survived
-    from round where status = 'resolved'
-  ),
-  record as (
-    select
-      user_id,
-      count(*) as rounds,
-      sum(survived) as survived,
-      sum(attack) as attack_rounds,
-      sum(attack and survived) as attack_survived
-    from outcome
-    group by user_id
+    from round indexed by round_resolved_outcome_idx
+    where status = 'resolved' and opponent_user_id in (select userId from candidate)
+  ), record as (
+    select user_id, count(*) as rounds, sum(survived) as survived,
+      sum(attack) as attack_rounds, sum(attack and survived) as attack_survived
+    from outcome group by user_id
   )
-  select
-    user.id as userId,
-    user.name as name,
-    user.image as image,
-    record.rounds as rounds,
-    record.survived as survived,
-    record.attack_rounds as attackRounds,
-    record.attack_survived as attackSurvived
-  from record
-  join user on user.id = record.user_id
-  order by
-    cast(record.survived as real) / record.rounds desc,
-    record.survived desc,
-    record.rounds desc,
-    user.name collate nocase asc,
-    user.id asc
-  limit ${limit}
+  select candidate.*, coalesce(record.rounds, 0) as rounds, coalesce(record.survived, 0) as survived,
+    coalesce(record.attack_rounds, 0) as attackRounds, coalesce(record.attack_survived, 0) as attackSurvived
+  from candidate left join record on record.user_id = candidate.userId
+  order by elo desc, eloGames desc, name collate nocase asc, userId asc
 `;

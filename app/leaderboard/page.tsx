@@ -14,12 +14,15 @@ export const metadata: Metadata = {
 
 const percent = (rate: number) => `${(rate * 100).toFixed(1)}%`;
 
-/** Who survives JEV most often, derived from resolved rounds on every request. */
+/** Elo interprets resolved history; survival remains visible as context. */
 export default async function LeaderboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/");
 
-  const entries = await getLeaderboard();
+  const entries = await getLeaderboard().catch(() => {
+    console.error("Elo leaderboard unavailable");
+    return null;
+  });
 
   return (
     <main className="leaderboard">
@@ -27,7 +30,9 @@ export default async function LeaderboardPage() {
       <p className="auth">Signed in as {session.user.name} <SignOutButton/></p>
       <nav className="leaderboard-nav"><Link href="/">Back to game</Link></nav>
 
-      {entries.length === 0 ? (
+      {entries === null ? (
+        <p className="notice">The leaderboard is temporarily unavailable. You can still play.</p>
+      ) : entries.length === 0 ? (
         <p className="notice">No one has survived AGI yet.</p>
       ) : (
         <div className="leaderboard-table">
@@ -36,7 +41,9 @@ export default async function LeaderboardPage() {
               <tr>
                 <th scope="col">#</th>
                 <th scope="col" className="player">Player</th>
+                <th scope="col">Elo</th>
                 <th scope="col">Survival</th>
+                <th scope="col">Rounds</th>
               </tr>
             </thead>
             <tbody>
@@ -53,7 +60,9 @@ export default async function LeaderboardPage() {
                         {you && <span className="you-tag">You</span>}
                       </span>
                     </th>
-                    <td className="rate">{percent(entry.survivalRate)}</td>
+                    <td className="elo">{Math.round(entry.elo)}</td>
+                    <td>{percent(entry.survivalRate)}</td>
+                    <td>{entry.rounds}</td>
                   </tr>
                 );
               })}

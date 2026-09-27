@@ -78,6 +78,9 @@ export const round = sqliteTable("round", {
   index("round_resolved_outcome_idx")
     .on(table.playerUserId, table.opponentUserId, table.decision)
     .where(sql`${table.status} = 'resolved'`),
+  index("round_elo_replay_idx")
+    .on(table.resolvedAt, table.id, table.playerUserId, table.opponentUserId, table.decision)
+    .where(sql`${table.status} = 'resolved'`),
 
   check("round_distinct_players", sql`${table.playerUserId} <> ${table.opponentUserId}`),
   check("round_player_argument_not_blank", sql`trim(${table.playerArgumentSnapshot}) <> ''`),

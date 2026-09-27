@@ -11,6 +11,10 @@ export interface LeaderboardEntry {
   name: string;
   image: string | null;
 
+  /** Raw Elo, rounded only by the UI. */
+  elo: number;
+  eloGames: number;
+
   rounds: number;
   survived: number;
   flattened: number;
