@@ -26,7 +26,8 @@ For a local checkout without git-based updates, run
 remove an existing installation before switching methods. Repository installs
 can be updated with `omarchy plugin update trolley.game`.
 
-The local-checkout installer checks dependencies, copies the plugin into
+The local-checkout installer installs dependencies with
+`omarchy pkg add pyside6 qt6-webengine`, checks the Python import, copies the plugin into
 `~/.config/omarchy/plugins/trolley.game`, and enables it. It refuses to overwrite
 an existing installation. For updates, review and copy the four runtime files
 (`manifest.json`, `Widget.qml`, `Service.qml`, `popup.py`) into that directory.
