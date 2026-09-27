@@ -5,6 +5,7 @@ import { PlayableMatchup } from "@/components/game/PlayableMatchup";
 import { TrolleyGame, type Matchup } from "@/components/game/TrolleyGame";
 import { OpponentDefense } from "@/components/player/OpponentDefense";
 import { auth } from "@/lib/auth";
+import { getArchenemies } from "@/lib/leaderboard/queries";
 import { findRandomOpponent, toOpponentView } from "@/lib/player/opponent";
 import { getStandingDefense } from "@/lib/player/profile";
 import { createRound, resolveRound } from "@/lib/round/actions";
@@ -33,9 +34,14 @@ export default async function Home() {
   }
 
   // Everyone signed in gets an opponent. Your own defense only decides whether others can draw you.
-  const [defense, found] = await Promise.all([
+  const [defense, found, archenemies] = await Promise.all([
     getStandingDefense(session.user.id),
     findRandomOpponent(session.user.id),
+    // Only decides whether the draw gets a splash; never worth failing the page over
+    getArchenemies(session.user.id).catch(() => {
+      console.error("Archenemies unavailable");
+      return [];
+    }),
   ]);
   // The opponent's defense is part of the visible matchup; their ids stay on the server.
   const opponent = found && toOpponentView(found);
@@ -43,6 +49,10 @@ export default async function Home() {
     player: { name: session.user.name, image: session.user.image ?? null },
     opponent: opponent && { name: opponent.name, image: opponent.image },
   };
+
+  // Where the draw ranks among the players who've beaten this one most, if at all
+  const rank = found ? archenemies.findIndex(enemy => enemy.userId === found.userId) : -1;
+  const rivalry = rank < 0 ? null : { rank: rank + 1, losses: archenemies[rank].losses, wins: archenemies[rank].wins };
 
   let judge = null;
   if (found) {
@@ -69,6 +79,7 @@ export default async function Home() {
       <PlayableMatchup
         key={crypto.randomUUID()}
         matchup={matchup}
+        rivalry={rivalry}
         judge={judge}
         resolve={resolve}
         defense={defense}

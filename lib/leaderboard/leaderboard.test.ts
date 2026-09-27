@@ -8,7 +8,7 @@ import { migrate } from "drizzle-orm/libsql/migrator";
 import { db } from "@/lib/db";
 import { round, user } from "@/lib/db/schema";
 import type { LeverDecision } from "@/lib/game/types";
-import { getLeaderboard, getLeaderboardTotals, leaderboardQuery, leaderboardTotalsQuery } from "./queries";
+import { archenemiesQuery, getArchenemies, getLeaderboard, getLeaderboardTotals, leaderboardQuery, leaderboardTotalsQuery } from "./queries";
 import type { LeaderboardEntry } from "./types";
 
 // A throwaway SQLite file, migrated exactly as Turso is. `db` connects on first use.
@@ -205,5 +205,40 @@ describe("getLeaderboardTotals", () => {
     const plan = await db.all<{ detail: string }>(sql`explain query plan ${leaderboardTotalsQuery}`);
     const details = plan.map(row => row.detail);
     assert.equal(details.filter(d => d.includes("COVERING INDEX round_resolved_outcome_idx")).length, 3, details.join("\n"));
+  });
+});
+
+describe("getArchenemies", () => {
+  const rivals = async (userId: string, limit?: number) =>
+    (await getArchenemies(userId, limit)).map(({ userId, losses, wins }) => ({ userId, losses, wins }));
+
+  test("losses count on both tracks: flattened on attack (dont_flip) and on defense (flip)", async () => {
+    await users("Alice", "Bob");
+    await resolved("alice", "bob", "dont_flip"); // Alice attacks, flattened
+    await resolved("bob", "alice", "flip");      // Alice defends, flattened
+    await resolved("alice", "bob", "flip");      // Alice attacks, survives
+    assert.deepEqual(await rivals("alice"), [{ userId: "bob", losses: 2, wins: 1 }]);
+    assert.deepEqual(await rivals("bob"), [{ userId: "alice", losses: 1, wins: 2 }]);
+  });
+
+  test("players you never lost to aren't enemies, and only resolved rounds count", async () => {
+    await users("Alice", "Bob", "Carol");
+    await resolved("alice", "bob", "flip");
+    await db.insert(round).values({ ...inputs("alice", "carol"), status: "created" });
+    assert.deepEqual(await rivals("alice"), []);
+  });
+
+  test("most losses first, then fewest wins, then name NOCASE; limited to the top", async () => {
+    await users("Alice", "bob", "Carol", "Dave", "Erin", "Frank", "Gina");
+    for (const enemy of ["bob", "carol", "carol", "dave", "dave", "erin", "frank", "gina"]) await resolved("alice", enemy, "dont_flip");
+    await resolved("alice", "dave", "flip");
+    assert.deepEqual((await rivals("alice")).map(r => r.userId), ["carol", "dave", "bob", "erin", "frank"]);
+    assert.deepEqual((await rivals("alice", 2)).map(r => r.userId), ["carol", "dave"]);
+  });
+
+  test("reads from the resolved-round index, never the round rows", async () => {
+    const plan = await db.all<{ detail: string }>(sql`explain query plan ${archenemiesQuery("alice", 5)}`);
+    const details = plan.map(row => row.detail);
+    assert.equal(details.filter(d => d.includes("COVERING INDEX round_resolved_outcome_idx")).length, 2, details.join("\n"));
   });
 });

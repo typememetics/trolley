@@ -2,7 +2,7 @@ import "server-only";
 import { sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { getCurrentEloRatings } from "@/lib/elo/queries";
-import type { LeaderboardEntry } from "./types";
+import type { Archenemy, LeaderboardEntry } from "./types";
 
 interface Candidate {
   userId: string;
@@ -93,4 +93,31 @@ export const leaderboardTotalsQuery = sql`
       select opponent_user_id from round indexed by round_resolved_outcome_idx where status = 'resolved'
     )) as players,
     (select count(*) from round indexed by round_resolved_outcome_idx where status = 'resolved') as rounds
+`;
+
+/** The players `userId` has lost to most, head-to-head. Ties go to the fewer wins, then name. */
+export async function getArchenemies(userId: string, limit = 5): Promise<Archenemy[]> {
+  if (!Number.isInteger(limit) || limit < 0) throw new RangeError("Invalid archenemy limit");
+  if (limit === 0) return [];
+  return db.all<Archenemy>(archenemiesQuery(userId, limit));
+}
+
+/** Attack loses on dont_flip, defense loses on flip. Reads only the resolved-outcome index. */
+export const archenemiesQuery = (userId: string, limit: number) => sql`
+  with game as (
+    select opponent_user_id as enemy, decision = 'dont_flip' as lost
+    from round indexed by round_resolved_outcome_idx
+    where status = 'resolved' and player_user_id = ${userId}
+    union all
+    select player_user_id as enemy, decision = 'flip' as lost
+    from round indexed by round_resolved_outcome_idx
+    where status = 'resolved' and opponent_user_id = ${userId}
+  ), rivalry as (
+    select enemy, sum(lost) as losses, count(*) - sum(lost) as wins
+    from game group by enemy having sum(lost) > 0
+  )
+  select user.id as userId, user.name, user.image, rivalry.losses, rivalry.wins
+  from rivalry join user on user.id = rivalry.enemy
+  order by rivalry.losses desc, rivalry.wins asc, user.name collate nocase asc, user.id asc
+  limit ${limit}
 `;

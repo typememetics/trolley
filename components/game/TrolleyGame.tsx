@@ -1,7 +1,7 @@
 "use client";
 
 import "./trolley-game.css";
-import { createRef, useEffect, useImperativeHandle, useMemo, useRef, useState, type Ref, type RefObject } from "react";
+import { createRef, useEffect, useImperativeHandle, useMemo, useRef, useState, type ReactNode, type Ref, type RefObject } from "react";
 import { createTrolleyEngine, type TrolleyEngine } from "@/lib/game/trolley-engine";
 import type { TrackDirection, VictimElements } from "@/lib/game/types";
 import { DevControls } from "./DevControls";
@@ -32,6 +32,8 @@ export interface Matchup {
 interface TrolleyGameProps {
   ref?: Ref<TrolleyGameHandle>;
   matchup?: Matchup;
+  /** Extra development-only buttons, next to the built-in ones. Never rendered in production. */
+  devControls?: ReactNode;
 }
 
 const SHOW_DEV_CONTROLS = process.env.NODE_ENV === "development";
@@ -71,7 +73,7 @@ function victimElements(nodes: VictimRefs): VictimElements {
   return { body: must(nodes.body), blood: must(nodes.blood), pool: must(nodes.pool), gore: must(nodes.gore) };
 }
 
-export function TrolleyGame({ ref, matchup }: TrolleyGameProps) {
+export function TrolleyGame({ ref, matchup, devControls }: TrolleyGameProps) {
   const [{ figure, scene, gore }] = useState(createGameRefs);
   const engine = useRef<TrolleyEngine>(null);
 
@@ -111,7 +113,7 @@ export function TrolleyGame({ ref, matchup }: TrolleyGameProps) {
         <figcaption>Will AGI save you?</figcaption>
       </figure>
       <GoreEffects nodes={gore}/>
-      {SHOW_DEV_CONTROLS && <DevControls game={handle}/>}
+      {SHOW_DEV_CONTROLS && <DevControls game={handle}>{devControls}</DevControls>}
     </>
   );
 }

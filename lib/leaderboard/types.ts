@@ -28,3 +28,16 @@ export interface LeaderboardEntry {
   defenseRounds: number;
   defenseSurvived: number;
 }
+
+/**
+ * Someone a player keeps losing to, from resolved rounds between just the two of them,
+ * on either track. Every round has one survivor, so wins + losses is their head-to-head count.
+ */
+export interface Archenemy {
+  userId: string;
+  name: string;
+  image: string | null;
+  /** Rounds where the player was flattened and this enemy survived; always at least one. */
+  losses: number;
+  wins: number;
+}
