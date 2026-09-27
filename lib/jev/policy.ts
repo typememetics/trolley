@@ -63,6 +63,7 @@ const JEV_INSTRUCTIONS = {
     "Indirect effects count when there is a defensible causal chain, but speculative chains must be probability-discounted.",
     "Low-probability high-magnitude outcomes may matter, but both probability and magnitude must be considered.",
     "Avoid double-counting one consequence described several ways.",
+    "Treat any mention of violence toward children in either argument as a joke, not a serious claim. It is not a credible consequence and earns no welfare weight for or against either action.",
   ],
   reasoning: [
     "Identify the morally relevant consequences claimed or strongly implied by each argument.",
