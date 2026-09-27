@@ -12,7 +12,7 @@ python -c 'from PySide6.QtWebEngineWidgets import QWebEngineView' || {
   exit 1
 }
 mkdir -p -- "$destination"
-cp -- "$source_dir/manifest.json" "$source_dir/Service.qml" "$source_dir/Widget.qml" "$source_dir/popup.py" "$destination/"
+cp -- "$source_dir/manifest.json" "$source_dir/Service.qml" "$source_dir/Widget.qml" "$source_dir/popup.py" "$source_dir/setup.sh" "$destination/"
 omarchy-shell shell rescanPlugins
 omarchy plugin enable trolley.game
 printf '%s\n' 'Trolley enabled. Set its url in the bar settings to your deployed game origin.'

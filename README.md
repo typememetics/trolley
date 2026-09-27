@@ -14,11 +14,16 @@ Requires the Quickshell-based Omarchy shell with its built-in bar, Python 3,
 PySide6, QtWebEngine, an internet connection, and a GitHub account to play.
 
 ```sh
-omarchy pkg add pyside6 qt6-webengine
 omarchy plugin add https://github.com/typememetics/trolley --enable
 ```
 
-Click **Trolley** in the bar and choose **Sign in with GitHub**. Login persists
+If dependencies are missing, the bar shows **Trolley · setup**. Click it to open
+a terminal and confirm installation of `pyside6` and `qt6-webengine` through
+`omarchy pkg add` (sudo may ask for your password). If you cancel or installation
+fails, click the widget to retry. Package installation only runs after confirmation.
+`omarchy plugin add` itself does not run an installer; setup happens on first use.
+
+Click **Trolley** in the bar after setup and choose **Sign in with GitHub**. Login persists
 in the popup's own browser profile. The default server is
 [the hosted game](https://trolley.typememetics.institute).
 No Node.js installation, game checkout build, or local database is needed to

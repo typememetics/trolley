@@ -17,9 +17,15 @@ migrations as usual.
 Install from the public repository:
 
 ```sh
-omarchy pkg add pyside6 qt6-webengine
 omarchy plugin add https://github.com/typememetics/trolley --enable
 ```
+
+The widget checks for PySide6 and QtWebEngine before starting the game helper.
+If either is missing, it shows **Trolley · setup**. Clicking opens a terminal
+that asks before running `omarchy pkg add pyside6 qt6-webengine`; sudo may ask
+for your password. After setup, click the widget to play. Cancelled or failed
+setup can be retried by clicking again. The plugin never installs packages on
+load. `omarchy plugin add` does not execute install hooks.
 
 For a local checkout without git-based updates, run
 `bash integrations/omarchy/install.sh` instead. Both methods use the same plugin ID;
@@ -29,8 +35,8 @@ can be updated with `omarchy plugin update trolley.game`.
 The local-checkout installer installs dependencies with
 `omarchy pkg add pyside6 qt6-webengine`, checks the Python import, copies the plugin into
 `~/.config/omarchy/plugins/trolley.game`, and enables it. It refuses to overwrite
-an existing installation. For updates, review and copy the four runtime files
-(`manifest.json`, `Widget.qml`, `Service.qml`, `popup.py`) into that directory.
+an existing installation. For updates, review and copy the five runtime files
+(`manifest.json`, `Widget.qml`, `Service.qml`, `popup.py`, `setup.sh`) into that directory.
 Omarchy hot-reloads them. The helper needs Python 3 and PySide6 with QtWebEngine.
 This plugin does not support the older Waybar shell.
 
