@@ -46,3 +46,19 @@
   padding: 1px 5px;
   border: 1px solid var(--ink);
 }
+
+/* Whole-history totals, above the table */
+.leaderboard-totals {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin: 20px 0 0;
+  font-variant-numeric: tabular-nums;
+}
+.leaderboard-totals dt {
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.leaderboard-totals dd { margin: 2px 0 0; font-size: 24px; font-weight: bold; }

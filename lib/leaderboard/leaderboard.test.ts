@@ -8,7 +8,7 @@ import { migrate } from "drizzle-orm/libsql/migrator";
 import { db } from "@/lib/db";
 import { round, user } from "@/lib/db/schema";
 import type { LeverDecision } from "@/lib/game/types";
-import { getLeaderboard, leaderboardQuery } from "./queries";
+import { getLeaderboard, getLeaderboardTotals, leaderboardQuery, leaderboardTotalsQuery } from "./queries";
 import type { LeaderboardEntry } from "./types";
 
 // A throwaway SQLite file, migrated exactly as Turso is. `db` connects on first use.
@@ -186,5 +186,24 @@ describe("getLeaderboard", () => {
     const plan = await db.all<{ detail: string }>(sql`explain query plan ${leaderboardQuery([{ userId: "alice", elo: 1516, eloGames: 1 }], 100)}`);
     const details = plan.map(row => row.detail);
     assert.equal(details.filter(d => d.includes("COVERING INDEX round_resolved_outcome_idx")).length, 2, details.join("\n"));
+  });
+});
+
+describe("getLeaderboardTotals", () => {
+  test("counts distinct players on either track and resolved rounds only", async () => {
+    assert.deepEqual(await getLeaderboardTotals(), { players: 0, rounds: 0 });
+
+    await users("Alice", "Bob", "Carol", "Dave");
+    await db.insert(round).values({ ...inputs("alice", "dave"), status: "created" });
+    await resolved("alice", "bob", "flip");
+    await resolved("bob", "alice", "dont_flip");
+    await resolved("carol", "bob", "flip");
+    assert.deepEqual(await getLeaderboardTotals(), { players: 3, rounds: 3 });
+  });
+
+  test("counts from the resolved-round index, never the round rows", async () => {
+    const plan = await db.all<{ detail: string }>(sql`explain query plan ${leaderboardTotalsQuery}`);
+    const details = plan.map(row => row.detail);
+    assert.equal(details.filter(d => d.includes("COVERING INDEX round_resolved_outcome_idx")).length, 3, details.join("\n"));
   });
 });

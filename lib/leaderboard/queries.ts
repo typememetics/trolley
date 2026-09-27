@@ -71,3 +71,26 @@ export const leaderboardQuery = (candidates: readonly Candidate[], limit: number
   from candidate left join record on record.user_id = candidate.userId
   order by elo desc, eloGames desc, name collate nocase asc, userId asc
 `;
+
+export interface LeaderboardTotals {
+  /** Distinct players with at least one resolved round, on either track. */
+  players: number;
+  /** Resolved rounds; each has exactly two players. */
+  rounds: number;
+}
+
+/** Whole-history totals, independent of the leaderboard limit. */
+export async function getLeaderboardTotals(): Promise<LeaderboardTotals> {
+  const [row] = await db.all<LeaderboardTotals>(leaderboardTotalsQuery);
+  return row;
+}
+
+export const leaderboardTotalsQuery = sql`
+  select
+    (select count(*) from (
+      select player_user_id from round indexed by round_resolved_outcome_idx where status = 'resolved'
+      union
+      select opponent_user_id from round indexed by round_resolved_outcome_idx where status = 'resolved'
+    )) as players,
+    (select count(*) from round indexed by round_resolved_outcome_idx where status = 'resolved') as rounds
+`;

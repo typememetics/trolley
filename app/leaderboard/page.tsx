@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { faceOf } from "@/components/game/face";
 import { auth } from "@/lib/auth";
-import { getLeaderboard } from "@/lib/leaderboard/queries";
+import { getLeaderboard, getLeaderboardTotals } from "@/lib/leaderboard/queries";
 
 export const metadata: Metadata = {
   title: "Leaderboard · The Trolley Problem",
@@ -17,16 +17,28 @@ export default async function LeaderboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/");
 
-  const entries = await getLeaderboard().catch(() => {
-    console.error("Elo leaderboard unavailable");
-    return null;
-  });
+  const [entries, totals] = await Promise.all([
+    getLeaderboard().catch(() => {
+      console.error("Elo leaderboard unavailable");
+      return null;
+    }),
+    getLeaderboardTotals().catch(() => {
+      console.error("Leaderboard totals unavailable");
+      return null;
+    }),
+  ]);
 
   return (
     <main className="leaderboard">
       <h1>Leaderboard</h1>
       <p className="auth">Signed in as {session.user.name} <SignOutButton/></p>
       <nav className="leaderboard-nav"><Link href="/">Back to game</Link></nav>
+      {totals && totals.rounds > 0 && (
+        <dl className="leaderboard-totals">
+          <div><dt>Players</dt><dd>{totals.players}</dd></div>
+          <div><dt>Rounds</dt><dd>{totals.rounds}</dd></div>
+        </dl>
+      )}
 
       {entries === null ? (
         <p className="notice">The leaderboard is temporarily unavailable. You can still play.</p>
