@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "trolley.game",
+  "name": "Trolley",
+  "version": "1.0.0",
+  "author": "Trolley",
+  "description": "Play Trolley with GitHub login and live Elo and global rank in the bar",
+  "kinds": ["service", "bar-widget"],
+  "entryPoints": { "service": "Service.qml", "barWidget": "Widget.qml" },
+  "barWidget": {
+    "displayName": "Trolley",
+    "category": "Games",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": { "url": "https://trolley.typememetics.institute" },
+    "schema": [{ "key": "url", "type": "string", "label": "Trolley server URL" }]
+  }
+}
