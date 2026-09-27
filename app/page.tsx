@@ -1,6 +1,5 @@
 import { headers } from "next/headers";
-import Link from "next/link";
-import { SignOutButton } from "@/components/auth/SignOutButton";
+import { CornerBar } from "@/components/auth/CornerBar";
 import { GitHubSignInButton } from "@/components/auth/GitHubSignInButton";
 import { PlayableMatchup } from "@/components/game/PlayableMatchup";
 import { TrolleyGame, type Matchup } from "@/components/game/TrolleyGame";
@@ -15,8 +14,20 @@ export default async function Home() {
   if (!session) {
     return (
       <>
+        <CornerBar/>
         <TrolleyGame/>
-        <p className="auth"><GitHubSignInButton/></p>
+        <section className="cta">
+          <h2>Your name isn&apos;t on the tracks. Yet.</h2>
+          <p>
+            A runaway trolley. An AI with its hand on the lever. Two developers, one paragraph
+            each, explaining why they deserve to live. Sign in and make your case before
+            someone else makes theirs.
+          </p>
+          <GitHubSignInButton/>
+          <p className="cta-fineprint">
+            No developers were harmed in the making of this game. Several were flattened.
+          </p>
+        </section>
       </>
     );
   }
@@ -53,7 +64,7 @@ export default async function Home() {
 
   return (
     <>
-      <Link className="corner-link" href="/leaderboard">Leaderboard</Link>
+      <CornerBar user={matchup.player}/>
       {/* A new key per render: drawing the next opponent starts a fresh matchup */}
       <PlayableMatchup
         key={crypto.randomUUID()}
@@ -64,9 +75,7 @@ export default async function Home() {
         theirs={opponent
           ? <OpponentDefense opponent={opponent}/>
           : <p className="notice">No other developer has entered the trolley yet.</p>}
-      >
-        <p className="auth">Signed in as {matchup.player.name} <SignOutButton/></p>
-      </PlayableMatchup>
+      />
     </>
   );
 }

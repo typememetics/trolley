@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { SignOutButton } from "@/components/auth/SignOutButton";
+import { CornerBar } from "@/components/auth/CornerBar";
 import { RoundPlayback } from "@/components/game/RoundPlayback";
 import { OpponentDefense } from "@/components/player/OpponentDefense";
 import { auth } from "@/lib/auth";
@@ -29,16 +29,18 @@ export default async function RoundPage({ params }: { params: Promise<{ id: stri
   };
 
   return (
-    <RoundPlayback key={round.id} matchup={matchup} initial={toRoundOutcome(round)} resolve={resolve}>
-      <p className="auth">Signed in as {session.user.name} <SignOutButton/></p>
-      <div className="matchup">
-        <OpponentDefense opponent={{ ...matchup.opponent, standingDefense: round.opponentDefenseSnapshot }}/>
-        <section className="defense">
-          <h2>Your defense</h2>
-          <p className="defense-who">As you wrote it for this round</p>
-          <blockquote>{round.playerArgumentSnapshot}</blockquote>
-        </section>
-      </div>
-    </RoundPlayback>
+    <>
+      <CornerBar user={{ name: session.user.name, image: session.user.image ?? null }}/>
+      <RoundPlayback key={round.id} matchup={matchup} initial={toRoundOutcome(round)} resolve={resolve}>
+        <div className="matchup">
+          <OpponentDefense opponent={{ ...matchup.opponent, standingDefense: round.opponentDefenseSnapshot }}/>
+          <section className="defense">
+            <h2>Your defense</h2>
+            <p className="defense-who">As you wrote it for this round</p>
+            <blockquote>{round.playerArgumentSnapshot}</blockquote>
+          </section>
+        </div>
+      </RoundPlayback>
+    </>
   );
 }

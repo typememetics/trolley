@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { CheckIcon, CloseIcon, PencilIcon } from "@/components/ui/icons";
 import { MAX_DEFENSE_LENGTH } from "@/lib/game/rules";
 import { saveStandingDefenseAction } from "@/lib/player/actions";
 
@@ -35,7 +36,7 @@ export function StandingDefenseForm({ defense: initial, onReadyChange }: {
       <section className="defense">
         <h2>Your defense</h2>
         <blockquote>{defense}</blockquote>
-        <button type="button" onClick={() => { setLength(defense.length); setEditing(true); }}>Edit</button>
+        <button type="button" className="btn" onClick={() => { setLength(defense.length); setEditing(true); }}><PencilIcon/> Edit</button>
       </section>
     );
   }
@@ -57,8 +58,8 @@ export function StandingDefenseForm({ defense: initial, onReadyChange }: {
       />
       <p className="defense-count" aria-live="polite">{length}/{MAX_DEFENSE_LENGTH}</p>
       {error && <p className="defense-error" role="alert">{error}</p>}
-      <button type="submit" disabled={saving}>{saving ? "Saving..." : "Save defense"}</button>
-      {defense && <button type="button" onClick={() => setEditing(false)}>Cancel</button>}
+      <button type="submit" className="btn btn-primary" disabled={saving}><CheckIcon/> {saving ? "Saving..." : "Save defense"}</button>
+      {defense && <button type="button" className="btn" onClick={() => setEditing(false)}><CloseIcon/> Cancel</button>}
     </form>
   );
 }

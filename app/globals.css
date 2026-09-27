@@ -32,7 +32,7 @@ figcaption {
   text-align: center;
   font-size: 15px;
 }
-.auth button { font: inherit; cursor: pointer; margin-left: 6px; }
+.auth .btn { margin-left: 6px; }
 
 .notice {
   position: relative;
@@ -64,11 +64,9 @@ figcaption {
   border: 2px solid var(--ink);
   resize: vertical;
 }
-.defense button { font: inherit; cursor: pointer; margin: 0 3px; }
+.defense .btn { margin: 0 3px; }
 .defense .defense-count { margin-top: -4px; text-align: right; font-style: normal; font-variant-numeric: tabular-nums; }
 .defense .defense-error { color: #A52F2F; font-style: normal; }
-
-.defense button:disabled { cursor: default; }
 
 /* The two cases side by side: theirs and yours */
 .matchup {
@@ -114,12 +112,19 @@ figcaption {
   text-transform: uppercase;
 }
 
-/* The way to the leaderboard, pinned to the page's top right */
-.corner-link {
+/* Pinned to the page's top right: who's signed in, then the way to the leaderboard */
+.corner-bar {
   position: absolute;
   top: 16px;
   right: 16px;
   z-index: 6;
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+.corner-link {
+  display: flex;
+  align-items: center;
   padding: 8px 18px;
   font-size: clamp(16px, 2.4vw, 22px);
   font-weight: bold;
@@ -131,3 +136,93 @@ figcaption {
   border: 3px solid var(--ink);
 }
 .corner-link:hover { color: var(--bg); background: var(--ink); }
+
+/* Every small button and button-like link: the corner link's look at a quieter size */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  font: bold 13px Georgia, "Times New Roman", serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  vertical-align: middle;
+  color: var(--ink);
+  background: var(--bg);
+  border: 2px solid var(--ink);
+  cursor: pointer;
+}
+.btn:hover:not(:disabled) { color: var(--bg); background: var(--ink); }
+.btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.btn svg { flex: none; }
+/* The one action a form exists for */
+.btn-primary { color: var(--bg); background: var(--ink); }
+.btn-primary:hover:not(:disabled) { color: var(--ink); background: var(--bg); }
+
+/* The signed-in player, framed to match the leaderboard link beside it */
+.whoami {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 8px;
+  background: var(--bg);
+  border: 3px solid var(--ink);
+}
+.whoami img { flex: none; border-radius: 50%; border: 2px solid var(--ink); }
+.whoami-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  text-align: left;
+}
+.whoami-text small {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.whoami-text strong {
+  max-width: 16ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+}
+.whoami .sign-out {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  padding: 0 10px;
+  color: var(--ink);
+  background: var(--bg);
+  border: 0;
+  border-left: 3px solid var(--ink);
+  cursor: pointer;
+}
+.whoami .sign-out:hover { color: var(--bg); background: var(--ink); }
+.whoami .sign-out:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* On narrow screens the avatar alone says who you are */
+@media (max-width: 600px) {
+  .whoami-text { display: none; }
+}
+
+/* What a logged-out visitor sees under the empty scene: the pitch, then the way in */
+.cta {
+  position: relative;
+  z-index: 5;
+  width: min(100%, 560px);
+  margin: 16px 0 0;
+  text-align: center;
+}
+.cta h2 {
+  margin: 0 0 8px;
+  font-size: clamp(20px, 3.2vw, 28px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.cta p { margin: 0 0 16px; font-size: 16px; font-style: italic; }
+.cta .btn { padding: 10px 22px; font-size: 16px; }
+.cta .btn svg { width: 20px; height: 20px; }
+.cta .cta-fineprint { margin: 16px 0 0; font-size: 12px; opacity: 0.6; }

@@ -2,8 +2,7 @@ import "./leaderboard.css";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { SignOutButton } from "@/components/auth/SignOutButton";
+import { ArrowLeftIcon } from "@/components/ui/icons";
 import { faceOf } from "@/components/game/face";
 import { auth } from "@/lib/auth";
 import { getLeaderboard, getLeaderboardTotals } from "@/lib/leaderboard/queries";
@@ -12,10 +11,9 @@ export const metadata: Metadata = {
   title: "Leaderboard · The Trolley Problem",
 };
 
-/** Elo interprets resolved history. */
+/** Elo interprets resolved history. Public; signing in only highlights your own row. */
 export default async function LeaderboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) redirect("/");
 
   const [entries, totals] = await Promise.all([
     getLeaderboard().catch(() => {
@@ -31,8 +29,7 @@ export default async function LeaderboardPage() {
   return (
     <main className="leaderboard">
       <h1>Leaderboard</h1>
-      <p className="auth">Signed in as {session.user.name} <SignOutButton/></p>
-      <nav className="leaderboard-nav"><Link href="/">Back to game</Link></nav>
+      <nav className="leaderboard-nav"><Link className="btn" href="/"><ArrowLeftIcon/> Back to game</Link></nav>
       {totals && totals.rounds > 0 && (
         <dl className="leaderboard-totals">
           <div><dt>Players</dt><dd>{totals.players}</dd></div>
@@ -58,7 +55,7 @@ export default async function LeaderboardPage() {
             <tbody>
               {entries.map((entry, i) => {
                 const face = faceOf(entry);
-                const you = entry.userId === session.user.id;
+                const you = entry.userId === session?.user.id;
                 return (
                   <tr key={entry.userId} className={you ? "you" : undefined}>
                     <td>{i + 1}</td>
