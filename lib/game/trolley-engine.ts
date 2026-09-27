@@ -13,6 +13,11 @@ import type { SceneElements, TrackDirection, VictimElements } from "./types";
 export const ALIVE_SRC = "/images/person-cutout.png";
 export const DEAD_SRC = "/images/dead2.png";
 
+// Buzzes the phone on impact: a long one when your opponent (up) is hit, buzz-pause-buzz when you (down) are.
+const IMPACT_VIBRATION: Record<TrackDirection, number | number[]> = { up: 200, down: [100, 50, 100] };
+// Unsupported on iOS Safari and desktop; browsers also ignore it before the user has touched the page.
+const vibrate = (pattern: number | number[]) => navigator.vibrate?.(pattern);
+
 export interface TrolleyEngine {
   /** Drive the trolley from the start to the end of the chosen branch. Resolves when it arrives (or is interrupted). */
   startTrolley(direction: TrackDirection): Promise<void>;
@@ -77,6 +82,7 @@ export function createTrolleyEngine(el: SceneElements): TrolleyEngine {
         // the trolley's front is well ahead of its wheel point, so it covers the person here
         if (p.x >= victimX - 40 && !isDead(victim)) {
           setDead(victim, true);
+          vibrate(IMPACT_VIBRATION[direction]);
           splashBlood(el.splash, el.splashAnimations);
           goreScreen(el.screenGore, el.figure);
           bloodyTrolley(el.trolleyBlood, el.trolleyGore);
