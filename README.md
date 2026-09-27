@@ -71,4 +71,6 @@ pnpm dev
 Server configuration is in [.env.example](.env.example), and the rating
 system is explained in [the Elo guide](lib/elo/README.md).
 
-The Omarchy integration is MIT-licensed; see [LICENSE](LICENSE) for its scope.
+The Omarchy integration is MIT-licensed. Everything else is proprietary and
+you may not run it without written permission from the licensor,
+[@effectfully](https://x.com/effectfully); see [LICENSE](LICENSE).

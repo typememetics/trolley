@@ -1,18 +1,43 @@
-Scope: This license covers the Omarchy integration in integrations/omarchy/,
-the root manifest.json, README.md, and preview.png. It does not change the
-licensing of the game server, game artwork, or other repository files.
-Screenshots reproduce the Trolley interface for promotion of this integration.
+Copyright (c) 2026 typememetics. All rights reserved, save as expressly
+provided herein.
 
-MIT License
+This repository is licensed under two separate and independent instruments.
+Part I governs the Omarchy Integration. Part II governs everything else.
+In the event of any conflict between them, Part I shall prevail solely with
+respect to the Omarchy Integration.
 
-Copyright (c) 2026 typememetics
+--------------------------------------------------------------------------------
+DEFINITIONS
+--------------------------------------------------------------------------------
+
+"Omarchy Integration" means the files in the integrations/omarchy/ directory
+and the file manifest.json at the root of this repository, together with any
+portions of this LICENSE file that reproduce the text of Part I.
+
+"Proprietary Materials" means each and every file, asset, work of authorship,
+and portion of this repository that is not the Omarchy Integration, including
+without limitation the game server, game logic, referee prompts and
+constitutions, rating system, database schema, artwork, animations, copy,
+README.md, preview.png, and marketing assets, whether in source or object form,
+and any derivative work thereof.
+
+"Licensor" means the natural person operating the account at
+https://x.com/effectfully, acting on behalf of typememetics, together with
+his successors and assigns.
+
+"You" means any natural person or legal entity exercising or purporting to
+exercise rights in respect of this repository.
+
+--------------------------------------------------------------------------------
+PART I: OMARCHY INTEGRATION (MIT LICENSE)
+--------------------------------------------------------------------------------
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+of the Omarchy Integration and associated documentation files (the
+"Software"), to deal in the Software without restriction, including without
+limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom
+the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
@@ -24,3 +49,79 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+The license granted in this Part I extends to the Omarchy Integration only and
+confers no right, title, license, or interest, whether express, implied, by
+estoppel, or otherwise, in or to any Proprietary Materials. The Omarchy
+Integration communicates with a game service operated by Licensor; nothing in
+this Part I grants any right to access or use that service other than in
+accordance with its terms.
+
+--------------------------------------------------------------------------------
+PART II: PROPRIETARY MATERIALS
+--------------------------------------------------------------------------------
+
+1. Reservation of Rights. The Proprietary Materials are, and shall remain, the
+   sole and exclusive property of Licensor. All right, title, and interest in
+   and to the Proprietary Materials, including all intellectual property rights
+   therein, are hereby reserved to Licensor.
+
+2. No License. Except as expressly set forth in Section 3, no license or other
+   right is granted to You. The availability of the Proprietary Materials in a
+   publicly accessible repository shall not be construed as publication under,
+   dedication to, or waiver in favour of the public, nor as a grant of any
+   license, whether express or implied.
+
+3. Limited Right to View. You may view the Proprietary Materials through the
+   interface of the hosting service on which this repository is made
+   available, solely to the extent that the terms of such service require such
+   right to be granted, and for no other purpose.
+
+4. Prohibited Acts. Without the prior written permission of Licensor, You
+   shall not, and shall not permit or assist any third party to:
+   (a) run, execute, deploy, host, or operate the Proprietary Materials, or any
+       part thereof, in any environment whatsoever, whether for commercial or
+       non-commercial purposes;
+   (b) copy, reproduce, modify, translate, adapt, or create derivative works of
+       the Proprietary Materials;
+   (c) distribute, publish, sublicense, sell, lease, lend, or otherwise make
+       the Proprietary Materials available to any third party; or
+   (d) use the Proprietary Materials, or any part thereof, to train, evaluate,
+       or fine-tune any machine learning model.
+
+5. Written Permission. Any permission contemplated by Section 4 shall be
+   effective only if each of the following conditions precedent has been
+   satisfied in full:
+   (a) Eligibility by Combat. You shall first have prevailed against Licensor
+       in a ranked round of Trolley at https://trolley.typememetics.institute,
+       that is to say, the presiding AGI shall, upon weighing Your argument
+       against Licensor's standing defense, have elected to flip the lever and
+       thereby direct the trolley into Licensor. A round in which the AGI
+       declines to flip, or in which no AGI presides, shall confer no
+       eligibility whatsoever, and Licensor's survival shall be conclusive;
+   (b) Request. Having so prevailed, You shall have requested permission from
+       Licensor, citing the round in question;
+   (c) Grant. Licensor shall thereafter have granted permission in a writing
+       that (i) is issued by Licensor personally, whether under his signature
+       or from the account identified in the definition of Licensor,
+       (ii) expressly identifies the Proprietary Materials and the acts
+       permitted, and (iii) is delivered to You prior to the commencement of
+       any such act.
+   Satisfaction of paragraphs (a) and (b) shall entitle You to ask and to
+   nothing more. Licensor may refuse any request for any reason or for no
+   reason, and no course of dealing, silence, number of victories, or failure
+   to enforce shall constitute permission.
+
+6. Termination. Any act in breach of this Part II shall automatically and
+   immediately terminate any permission previously granted to You, without
+   notice, and without prejudice to any other right or remedy of Licensor at
+   law or in equity.
+
+7. Disclaimer. THE PROPRIETARY MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY
+   OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL LICENSOR BE LIABLE FOR ANY
+   CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION
+   WITH THE PROPRIETARY MATERIALS.
+
+8. Severability. Should any provision of this Part II be held unenforceable,
+   such provision shall be enforced to the maximum extent permissible, and the
+   remaining provisions shall continue in full force and effect.
