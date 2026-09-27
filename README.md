@@ -1,74 +1,74 @@
-# Trolley for Omarchy
+# Trolley
 
-**Will AGI save you? Find out from your status bar.**
+**A runaway trolley. Two people on the tracks. An AI at the lever. You have 140 characters.**
 
-Two developers. One runaway trolley. An AI with its hand on the lever.
-Sign in with GitHub, make your case, and play in a floating popup on Omarchy.
-Your current Elo and global rank stay in the bar between rounds.
+Play it at [trolley.typememetics.institute](https://trolley.typememetics.institute).
 
-![Trolley for Omarchy](preview.png)
+![Trolley](preview.png)
 
-## Install the Omarchy plugin
+## The whole game
 
-Requires the Quickshell-based Omarchy shell with its built-in bar, Python 3,
-PySide6, QtWebEngine, an internet connection, and a GitHub account to play.
+You're tied to the main track. Someone else is tied to the other one. The
+trolley is coming, and AGI decides whether to pull the lever.
+
+You get one argument for why you should live. Your opponent is already on the
+board with their standing defense: 140 characters or fewer, written ahead of
+time. AGI reads both and rules. It flips, and they're gone. It doesn't, and
+you are.
+
+That's it. There's no inventory, no deck-building and no season pass. The only
+thing that counts is what you write.
+
+## Why it works this way
+
+**The judge only reads the words.** AGI never sees names, avatars or account
+ids. It gets two pieces of text. A famous handle or a big follower count
+doesn't help you. A better sentence does.
+
+**Your defense plays while you sleep.** The line you leave on the board is what
+the next challenger has to beat. Write something that holds up against
+strangers, because strangers are the ones who'll read it.
+
+**The judge isn't always the same judge.** Most rounds get plain AGI. About one
+round in four gets a different one: idiot AGI, terse AGI, chaos AGI, or AGI
+reading the case through Kant or Žižek. You won't know which is holding the
+lever. An argument that only works on one reader isn't a very good argument.
+
+**Every round counts forever.** Each resolved round is permanent history, and
+your rating is calculated from that history using plain Elo. Everyone starts
+at 1500 and K is 32. Nobody grinds a hidden number. The
+[leaderboard](https://trolley.typememetics.institute/leaderboard) is just the
+record of who kept surviving.
+
+**No referee, no round.** If the AI call fails, the round doesn't happen.
+There's no fallback coin flip or quiet default. We'd rather tell you it broke
+than make up a result.
+
+## Also in your status bar
+
+If you're on Omarchy, Trolley can live in your bar. It shows your Elo and rank,
+and one click opens the game in a popup:
 
 ```sh
 omarchy plugin add https://github.com/typememetics/trolley --enable
 ```
 
-If dependencies are missing, the bar shows **Trolley · setup**. Click it to open
-a terminal and confirm installation of `pyside6` and `qt6-webengine` through
-`omarchy pkg add` (sudo may ask for your password). If you cancel or installation
-fails, click the widget to retry. Package installation only runs after confirmation.
-`omarchy plugin add` itself does not run an installer; setup happens on first use.
+Details are in the [plugin guide](integrations/omarchy/README.md). The game
+itself is still just a web page. Any browser will do.
 
-Click **Trolley** in the bar after setup and choose **Sign in with GitHub**. Login persists
-in the popup's own browser profile. The default server is
-[the hosted game](https://trolley.typememetics.institute).
-No Node.js installation, game checkout build, or local database is needed to
-use the desktop plugin. Older Waybar-based Omarchy versions are unsupported.
+## Under the hood
 
-- **Elo and rank in the bar.** Refreshes every 30 seconds and when opening or closing the popup.
-- **Play in the popup.** Resize it, use Back or Reload, and hide it with Escape or Close.
-- **Keep your place.** Hiding the popup keeps the game running and preserves the login.
-- **One window across monitors.** Every bar controls the same shared game session.
-- **Clear connection states.** Signed-out, unranked, and offline states are shown explicitly.
-
-To use a different server, change **Trolley server URL** in the widget settings.
-Use an HTTPS origin; `http://localhost:3000` is also supported for development.
-
-## Update or remove
+It's a Next.js app with Better Auth (sign in with GitHub), Turso/libSQL through
+Drizzle, and the TypeSafe AI SDK doing the judging. That's the whole stack.
 
 ```sh
-omarchy plugin update trolley.game
-omarchy plugin remove trolley.game
+nix develop
+pnpm install
+pnpm db:migrate
+pnpm dev
 ```
 
-Omarchy prompts before installation and updates. Removal leaves your browser
-profile in `${XDG_DATA_HOME:-~/.local/share}/trolley/<server hash>`; sign out in
-the game before removal to end that session. You may remove that profile
-separately to clear local cookies and storage.
-
-The plugin does not replace the user's shell configuration. It is added as one
-bar entry and uses the shell's normal enable/disable and update mechanisms.
-
-## Screenshots and demo
-
-![The Trolley popup](integrations/omarchy/marketing/popup-sign-in.png)
-
-![A short tour of the popup](integrations/omarchy/marketing/popup-tour.gif)
-
-[Marketing assets and ready-to-use copy](integrations/omarchy/marketing/README.md)
-
-## Development
-
-This repository contains both the game and its Omarchy integration. The root
-manifest points to the QML and Python files in `integrations/omarchy/`.
-
-See the [plugin guide](integrations/omarchy/README.md) for architecture,
-authentication, configuration, and checks. The game uses Next.js, Better Auth,
-Turso/libSQL, and the TypeSafe AI referee; see [.env.example](.env.example) and
-[the Elo guide](lib/elo/README.md) for server setup.
+Server configuration is in [.env.example](.env.example), and the rating
+system is explained in [the Elo guide](lib/elo/README.md).
 
 The Omarchy integration is MIT-licensed; see [LICENSE](LICENSE) for its scope.
