@@ -14,14 +14,19 @@ app uses the same callback as the website:
 client secret is needed. Set the game's normal environment variables and database
 migrations as usual.
 
-On Omarchy, from this checkout:
+Install from the public repository:
 
 ```sh
 omarchy pkg add pyside6 qt6-webengine
-bash integrations/omarchy/install.sh
+omarchy plugin add https://github.com/typememetics/trolley --enable
 ```
 
-The installer checks dependencies, copies the plugin into
+For a local checkout without git-based updates, run
+`bash integrations/omarchy/install.sh` instead. Both methods use the same plugin ID;
+remove an existing installation before switching methods. Repository installs
+can be updated with `omarchy plugin update trolley.game`.
+
+The local-checkout installer checks dependencies, copies the plugin into
 `~/.config/omarchy/plugins/trolley.game`, and enables it. It refuses to overwrite
 an existing installation. For updates, review and copy the four runtime files
 (`manifest.json`, `Widget.qml`, `Service.qml`, `popup.py`) into that directory.
