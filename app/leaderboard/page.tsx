@@ -68,6 +68,7 @@ export default async function LeaderboardPage() {
               })}
             </tbody>
           </table>
+          <p className="leaderboard-note">Elo updates after every judged round.</p>
         </div>
       )}
     </main>
