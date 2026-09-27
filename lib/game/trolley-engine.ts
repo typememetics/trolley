@@ -13,8 +13,13 @@ import type { SceneElements, TrackDirection, VictimElements } from "./types";
 export const ALIVE_SRC = "/images/person-cutout.png";
 export const DEAD_SRC = "/images/dead2.png";
 
-// Buzzes the phone on impact: a long one when your opponent (up) is hit, buzz-pause-buzz when you (down) are.
-const IMPACT_VIBRATION: Record<TrackDirection, number | number[]> = { up: 200, down: [100, 50, 100] };
+// Rattles the phone on impact. The API can't set intensity, only timing: long buzzes with barely any rest
+// read as stronger, uneven stutters as angrier. Opponent (up): a slam, a stutter, a long grind.
+// You (down): two furious bursts and a longer grind.
+const IMPACT_VIBRATION: Record<TrackDirection, number[]> = {
+  up: [500, 40, 120, 30, 120, 30, 250, 40, 900],
+  down: [400, 30, 90, 25, 90, 25, 400, 30, 90, 25, 90, 25, 1200],
+};
 // Unsupported on iOS Safari and desktop; browsers also ignore it before the user has touched the page.
 const vibrate = (pattern: number | number[]) => navigator.vibrate?.(pattern);
 
@@ -97,6 +102,7 @@ export function createTrolleyEngine(el: SceneElements): TrolleyEngine {
 
   function reset() {
     stop();
+    vibrate(0);   // cut off a rattle that's still going
     TRACK_DIRECTIONS.forEach(d => {
       const victim = el.victims[d];
       setDead(victim, false);
