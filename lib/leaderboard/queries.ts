@@ -2,6 +2,7 @@ import "server-only";
 import { sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { getCurrentEloRatings } from "@/lib/elo/queries";
+import { ELO_INITIAL_RATING } from "@/lib/elo/algorithm";
 import type { Archenemy, LeaderboardEntry } from "./types";
 
 interface Candidate {
@@ -18,6 +19,28 @@ interface Row extends Candidate {
   attackRounds: number;
   attackSurvived: number;
 }
+
+/** Global position with exactly the leaderboard's tie-breakers, without its top-100 limit. */
+export async function getPlayerStanding(userId: string): Promise<{ elo: number; rank: number | null }> {
+  const ratings = await getCurrentEloRatings();
+  if (!ratings.has(userId)) return { elo: ELO_INITIAL_RATING, rank: null };
+  const candidates = [...ratings].map(([id, state]) => ({ userId: id, elo: state.rating, eloGames: state.games }));
+  const [standing] = await db.all<{ elo: number; rank: number }>(playerStandingQuery(candidates, userId));
+  return standing ?? { elo: ELO_INITIAL_RATING, rank: null };
+}
+
+export const playerStandingQuery = (candidates: readonly Candidate[], userId: string) => sql`
+  with ranked as (
+    select user.id as userId, json_extract(value, '$.elo') as elo,
+      row_number() over (
+        order by json_extract(value, '$.elo') desc, json_extract(value, '$.eloGames') desc,
+          user.name collate nocase asc, user.id asc
+      ) as rank
+    from json_each(${JSON.stringify(candidates)})
+    join user on user.id = json_extract(value, '$.userId')
+  )
+  select elo, rank from ranked where userId = ${userId}
+`;
 
 /** Competitive order comes from full-precision Elo; survival remains a SQL projection. */
 export async function getLeaderboard(limit = 100): Promise<LeaderboardEntry[]> {

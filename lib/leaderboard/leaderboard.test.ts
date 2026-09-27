@@ -8,7 +8,7 @@ import { migrate } from "drizzle-orm/libsql/migrator";
 import { db } from "@/lib/db";
 import { round, user } from "@/lib/db/schema";
 import type { LeverDecision } from "@/lib/game/types";
-import { archenemiesQuery, getArchenemies, getLeaderboard, getLeaderboardTotals, leaderboardQuery, leaderboardTotalsQuery } from "./queries";
+import { archenemiesQuery, getArchenemies, getLeaderboard, getLeaderboardTotals, getPlayerStanding, leaderboardQuery, leaderboardTotalsQuery, playerStandingQuery } from "./queries";
 import type { LeaderboardEntry } from "./types";
 
 // A throwaway SQLite file, migrated exactly as Turso is. `db` connects on first use.
@@ -69,6 +69,45 @@ after(() => rmSync(dir, { recursive: true, force: true }));
 beforeEach(async () => {
   await db.delete(round);
   await db.delete(user);
+});
+
+describe("desktop player standing", () => {
+  test("new players have initial Elo and no competitive rank", async () => {
+    await users("Alice");
+    assert.deepEqual(await getPlayerStanding("alice"), { elo: 1500, rank: null });
+  });
+
+  test("live ratings match leaderboard positions", async () => {
+    await users("Alice", "Bob", "Carol");
+    await resolved("alice", "bob", "flip");
+    await resolved("bob", "carol", "dont_flip");
+    const board = await getLeaderboard();
+    for (const [index, entry] of board.entries()) {
+      assert.deepEqual(await getPlayerStanding(entry.userId), { elo: entry.elo, rank: index + 1 });
+    }
+  });
+
+  test("global ranks beyond 100 use raw Elo, games, NOCASE name, and id ordering", async () => {
+    const names = Array.from({ length: 105 }, (_, i) => `Player${String(i).padStart(3, "0")}`);
+    await users(...names);
+    await db.insert(user).values([
+      { id: "tie-b", name: "ALPHA", email: "b@test.invalid" },
+      { id: "tie-a", name: "alpha", email: "a@test.invalid" },
+    ]);
+    const candidates = [
+      ...names.map(name => ({ userId: name.toLowerCase(), elo: 1500, eloGames: 1 })),
+      { userId: "tie-b", elo: 1500, eloGames: 1 },
+      { userId: "tie-a", elo: 1500, eloGames: 1 },
+    ];
+    candidates[0].elo = 1500.01;
+    candidates[1].eloGames = 2;
+    const board = await db.all<{ userId: string; elo: number }>(leaderboardQuery(candidates, 1000));
+    assert.deepEqual(board.slice(0, 4).map(row => row.userId), ["player000", "player001", "tie-a", "tie-b"]);
+    for (const [index, entry] of board.entries()) {
+      assert.deepEqual(await db.all(playerStandingQuery(candidates, entry.userId)), [{ elo: entry.elo, rank: index + 1 }]);
+    }
+    assert.equal(board.length, 107);
+  });
 });
 
 describe("getLeaderboard", () => {
