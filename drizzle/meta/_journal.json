@@ -36,6 +36,13 @@
       "when": 1790500081946,
       "tag": "0004_elo_checkpoints",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1790506229172,
+      "tag": "0005_round_rate_limit",
+      "breakpoints": true
     }
   ]
 }

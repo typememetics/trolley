@@ -1,7 +1,8 @@
 import "server-only";
-import { and, eq, inArray, lt, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, lt, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { round, user } from "@/lib/db/schema";
+import { ROUND_INTERVAL_MS, ROUNDS_PER_DAY } from "@/lib/game/rules";
 import type { JevDecision } from "@/lib/jev/evaluate-round";
 import type { GameRound, JudgingRound, RoundFailureCode } from "./types";
 
@@ -81,15 +82,50 @@ export async function findRound(id: string): Promise<GameRound | null> {
   return first(await db.select().from(round).where(eq(round.id, id)));
 }
 
-/** A new round in `created`. Its inputs are final from here on. */
+const DAY_MS = 24 * 60 * 60_000;
+
+/** Why a player can't start a round right now; `retryInMs` is how long until they can. */
+export type RoundLimit = { limit: "too_soon"; retryInMs: number } | { limit: "daily_limit" };
+
+/** The player's rounds created within the last `ms`, by the database's clock. */
+const playedWithin = (playerUserId: string, ms: number) => and(
+  eq(round.playerUserId, playerUserId),
+  gt(round.createdAt, sql`${now} - ${ms}`),
+);
+
+/**
+ * A new round in `created`, unless the player is over a rate limit. Its inputs are final
+ * from here on. The limits and the insert are one statement, so a burst of simultaneous
+ * requests can't all squeeze in under them.
+ */
 export async function insertRound(inputs: {
   playerUserId: string;
   opponentUserId: string;
   playerArgumentSnapshot: string;
   opponentDefenseSnapshot: string;
-}): Promise<GameRound> {
-  const [row] = await db.insert(round).values(inputs).returning();
-  return toGameRound(row);
+}): Promise<GameRound | RoundLimit> {
+  const { playerUserId, opponentUserId, playerArgumentSnapshot, opponentDefenseSnapshot } = inputs;
+  const id = crypto.randomUUID();
+  const inserted = await db.all<{ id: string }>(sql`
+    insert into ${round} (id, player_user_id, opponent_user_id, player_argument_snapshot, opponent_defense_snapshot)
+    select ${id}, ${playerUserId}, ${opponentUserId}, ${playerArgumentSnapshot}, ${opponentDefenseSnapshot}
+    where not exists (select 1 from ${round} where ${playedWithin(playerUserId, ROUND_INTERVAL_MS)})
+      and (select count(*) from ${round} where ${playedWithin(playerUserId, DAY_MS)}) < ${ROUNDS_PER_DAY}
+    returning id`);
+  if (inserted.length > 0) {
+    const created = await findRound(id);
+    if (!created) throw new MalformedRoundError(id, "inserted round is missing");
+    return created;
+  }
+
+  // Refused. Which limit only shapes the answer, so this second look needn't be atomic.
+  const [last] = await db
+    .select({ elapsed: sql<number>`${now} - max(${round.createdAt})` })
+    .from(round)
+    .where(playedWithin(playerUserId, ROUND_INTERVAL_MS));
+  return last?.elapsed != null
+    ? { limit: "too_soon", retryInMs: Math.max(0, ROUND_INTERVAL_MS - last.elapsed) }
+    : { limit: "daily_limit" };
 }
 
 /**
