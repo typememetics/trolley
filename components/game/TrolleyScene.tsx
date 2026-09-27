@@ -14,7 +14,9 @@ export interface SceneRefs {
   victims: Record<TrackDirection, VictimRefs>;
 }
 
-const NOBODY: Face = { src: placeholderAvatar("?"), label: "No opponent yet" };
+const NOBODY: Face = { src: placeholderAvatar("?", "#fff"), label: "No opponent yet" };
+/** Who's on the tracks before there's a matchup to show. */
+const UNKNOWN: Face = { src: placeholderAvatar("?", "#fff"), label: "Unknown" };
 
 /**
  * The illustration, laid out in the coordinate space of tracks.png (1448 × 1086).
@@ -35,12 +37,12 @@ export function TrolleyScene({ nodes: { trolley, trailRails, trailSmear, trailDr
       <Victim
         direction="up"
         nodes={victims.up}
-        face={matchup && (matchup.opponent ? faceOf(matchup.opponent) : NOBODY)}
+        face={matchup ? (matchup.opponent ? faceOf(matchup.opponent) : NOBODY) : UNKNOWN}
         tag={matchup && (matchup.opponent?.name ?? "Opponent")}
       />
 
       {/* The lower (main) branch, where the trolley goes unless the lever is pulled: the signed-in player */}
-      <Victim direction="down" nodes={victims.down} face={matchup && faceOf(matchup.player)} tag={matchup && "You"}/>
+      <Victim direction="down" nodes={victims.down} face={matchup ? faceOf(matchup.player) : UNKNOWN} tag={matchup && "You"}/>
 
       <Trolley nodes={trolley}/>
       <img className="operator" src="/images/operator.png" alt="A person standing at the lever that switches the tracks"/>
