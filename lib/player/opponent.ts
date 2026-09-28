@@ -1,6 +1,7 @@
 import { and, eq, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { playerProfile, user } from "@/lib/db/schema";
+import { closeRatingFirst } from "./matchmaking";
 
 export interface Opponent {
   userId: string;
@@ -24,6 +25,10 @@ const eligibleOpponentOf = (currentUserId: string) => and(
 /**
  * A random other player with a written defense, or null if nobody qualifies yet.
  * Your own defense decides whether others can draw you, never whether you get an opponent.
+ *
+ * The draw favours players rated near `currentUserId`. A uniform draw let frequent players
+ * farm the average of the pool while idle defenses were drawn mostly by those same
+ * frequent (and stronger) players, so Elo rewarded volume as much as quality.
  */
 export async function findRandomOpponent(currentUserId: string): Promise<Opponent | null> {
   const [row] = await db
@@ -36,7 +41,7 @@ export async function findRandomOpponent(currentUserId: string): Promise<Opponen
     .from(playerProfile)
     .innerJoin(user, eq(user.id, playerProfile.userId))
     .where(eligibleOpponentOf(currentUserId))
-    .orderBy(sql`random()`)
+    .orderBy(closeRatingFirst(currentUserId, sql`${playerProfile.userId}`))
     .limit(1);
   return row ? { ...row, standingDefense: row.standingDefense! } : null;
 }

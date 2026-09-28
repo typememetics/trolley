@@ -2,7 +2,9 @@
 
 Resolved rounds are competitive history. Elo is a deterministic interpretation of
 that history. Checkpoints are disposable caches: deleting every checkpoint loses
-no competitive truth. Gameplay never calls the Elo modules.
+no competitive truth. Gameplay never writes Elo; matchmaking reads the latest ready
+checkpoint (no tail replay) inside its single opponent query to favour players
+rated near you (`lib/player/matchmaking.ts`). With no checkpoint the draw is uniform.
 
 ## Rating and replay
 
