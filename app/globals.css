@@ -243,3 +243,52 @@ figcaption {
 .cta .btn { padding: 10px 22px; font-size: 16px; }
 .cta .btn svg { width: 20px; height: 20px; }
 .cta .cta-fineprint { margin: 16px 0 0; font-size: 12px; opacity: 0.6; }
+
+/* A rate-limited player: a loading screen that stands in for the matchup until they may play */
+.worthiness {
+  position: relative;
+  z-index: 5;
+  width: min(100%, 560px);
+  margin: clamp(96px, 18vh, 180px) 0 0;
+  text-align: center;
+}
+.worthiness h2 {
+  margin: 0 0 20px;
+  font-size: clamp(20px, 3.2vw, 28px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.worthiness-spinner {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 24px;
+  border: 4px solid var(--ink);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: worthiness-spin 0.9s linear infinite;
+}
+.worthiness-bar {
+  height: 14px;
+  border: 2px solid var(--ink);
+  overflow: hidden;
+}
+.worthiness-bar span {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  transform-origin: left;
+  animation: worthiness-fill 5s linear forwards;
+}
+/* Rushes most of the way, then crawls toward a finish it never reaches */
+.worthiness-bar .worthiness-stuck {
+  width: 97%;
+  animation: worthiness-fill 60s cubic-bezier(0.05, 0.9, 0.1, 1) forwards;
+}
+.worthiness-step { margin: 12px 0 0; font-size: 16px; font-style: italic; min-height: 1.5em; }
+.worthiness-fineprint { margin: 24px 0 0; font-size: 12px; opacity: 0.6; }
+@keyframes worthiness-spin { to { transform: rotate(360deg); } }
+@keyframes worthiness-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .worthiness-spinner { animation-duration: 3s; }
+  .worthiness-bar span { animation: none; }
+}

@@ -1,12 +1,13 @@
 import "server-only";
 import { getOpponentDefense } from "@/lib/player/opponent";
 import { getStandingDefense } from "@/lib/player/profile";
-import { insertRound } from "./queries";
+import { insertRound, type RoundLimit } from "./queries";
 
 export type CreateRoundResult =
   /** `playerArgument` is the player's own snapshot, so the page can show what is being judged. */
   | { ok: true; roundId: string; playerArgument: string }
-  | { ok: false; error: string };
+  /** `limited` when the player is over a rate limit: the page waits instead of showing `error`. */
+  | { ok: false; error: string; limited?: RoundLimit };
 
 /**
  * Snapshot a matchup into a new round, without asking JEV anything. Both arguments are
@@ -31,5 +32,6 @@ export async function createRoundFor(playerUserId: string, opponentUserId: strin
     playerArgumentSnapshot: playerArgument,
     opponentDefenseSnapshot: opponentDefense,
   });
+  if ("limit" in created) return { ok: false, error: "AGI is considering whether you are even worthy to play.", limited: created };
   return { ok: true, roundId: created.id, playerArgument };
 }

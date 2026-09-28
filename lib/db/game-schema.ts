@@ -72,7 +72,8 @@ export const round = sqliteTable("round", {
   resolvedAt: integer("resolved_at", { mode: "timestamp_ms" }),
   failedAt: integer("failed_at", { mode: "timestamp_ms" }),
 }, table => [
-  index("round_player_user_id_idx").on(table.playerUserId),
+  // Also covers the player's recent rounds, for the rate limits in queries.ts
+  index("round_player_created_idx").on(table.playerUserId, table.createdAt),
   index("round_opponent_user_id_idx").on(table.opponentUserId),
   // Covers the leaderboard: every resolved round's two sides and verdict, without reading the snapshots
   index("round_resolved_outcome_idx")

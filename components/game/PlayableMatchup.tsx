@@ -1,13 +1,18 @@
 "use client";
 
-import { useCallback, useMemo, useState, useTransition, type ReactNode } from "react";
+import { useCallback, useEffect, useEffectEvent, useMemo, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { StandingDefenseForm } from "@/components/player/StandingDefenseForm";
+import { ROUND_INTERVAL_MS } from "@/lib/game/rules";
 import type { ResolveRoundResult } from "@/lib/round/actions";
 import type { CreateRoundResult } from "@/lib/round/create-round";
 import { ArchenemySplash, type Rivalry } from "./ArchenemySplash";
+import type { RoundLimit } from "@/lib/round/queries";
 import { RoundPlayback } from "./RoundPlayback";
 import { TrolleyGame, type Matchup } from "./TrolleyGame";
+import { WorthinessCheck } from "./WorthinessCheck";
+
+const SHOW_DEV_CONTROLS = process.env.NODE_ENV === "development";
 
 /** The round this matchup became, once Judge has recorded it. */
 interface StartedRound {
@@ -38,6 +43,8 @@ export function PlayableMatchup({ matchup, rivalry = null, judge, resolve, their
   const [ready, setReady] = useState(defense !== null);
   const [error, setError] = useState<string | null>(null);
   const [round, setRound] = useState<StartedRound | null>(null);
+  /** Over a rate limit: the loading screen stands in for the matchup. */
+  const [limited, setLimited] = useState<RoundLimit | null>(null);
   const [starting, startRound] = useTransition();
   const router = useRouter();
   // Once per draw: a fresh key remounts this component, and with it the splash
@@ -58,7 +65,12 @@ export function PlayableMatchup({ matchup, rivalry = null, judge, resolve, their
         // Network failure or a page left open across a deploy
         return setError("The round could not be started. Try again.");
       }
-      if (!created.ok) return setError(created.error);
+      if (!created.ok) {
+        if (created.limited) return setLimited(created.limited);
+        setLimited(null);
+        return setError(created.error);
+      }
+      setLimited(null);
       setRound({ id: created.roundId, playerArgument: created.playerArgument });
     });
   }
@@ -71,6 +83,36 @@ export function PlayableMatchup({ matchup, rivalry = null, judge, resolve, their
       onDone={dismissSplash}
     />
   );
+
+  // Too soon: try again once the wait is over, with the loading screen up meanwhile
+  const retryJudge = useEffectEvent(onJudge);
+  useEffect(() => {
+    if (limited?.limit !== "too_soon") return;
+    const timer = setTimeout(retryJudge, limited.retryInMs + 250);
+    return () => clearTimeout(timer);
+  }, [limited]);
+
+  // Development only: the loading screen on demand, without a real limit or a real retry
+  const [preview, setPreview] = useState<RoundLimit | null>(null);
+  useEffect(() => {
+    if (preview?.limit !== "too_soon") return;
+    const timer = setTimeout(() => setPreview(null), preview.retryInMs);
+    return () => clearTimeout(timer);
+  }, [preview]);
+
+  const shown = limited ?? preview;
+  if (shown) {
+    return (
+      <>
+        <WorthinessCheck waitMs={shown.limit === "too_soon" ? shown.retryInMs : undefined}/>
+        {preview && !limited && (
+          <div className="dev-controls dev-controls-left" aria-label="Development controls">
+            <button type="button" onClick={() => setPreview(null)}>Close preview</button>
+          </div>
+        )}
+      </>
+    );
+  }
 
   if (round && resolveThis) {
     return (
@@ -110,6 +152,12 @@ export function PlayableMatchup({ matchup, rivalry = null, judge, resolve, their
             {starting ? "Judging..." : "Judge"}
           </button>
           {error && <p className="defense-error" role="alert">{error}</p>}
+        </div>
+      )}
+      {SHOW_DEV_CONTROLS && (
+        <div className="dev-controls dev-controls-left" aria-label="Development controls">
+          <button type="button" onClick={() => setPreview({ limit: "too_soon", retryInMs: ROUND_INTERVAL_MS })}>Blocked: too soon</button>
+          <button type="button" onClick={() => setPreview({ limit: "daily_limit" })}>Blocked: daily limit</button>
         </div>
       )}
     </>

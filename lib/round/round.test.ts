@@ -10,6 +10,7 @@ import { playerProfile, round, user } from "@/lib/db/schema";
 import { InvalidJevResultError, type JevDecision } from "@/lib/jev/evaluate-round";
 import { saveStandingDefense } from "@/lib/player/profile";
 import { createRoundFor } from "./create-round";
+import { ROUND_INTERVAL_MS, ROUNDS_PER_DAY } from "@/lib/game/rules";
 import { JUDGING_TIMEOUT_MS } from "./queries";
 import { resolveRoundFor, type Judge } from "./resolve-round";
 
@@ -85,6 +86,56 @@ describe("createRoundFor", () => {
   });
 });
 
+/** Rounds Alice played `ago` ms back, written directly: created_at can't be backdated later. */
+async function pastRounds(count: number, ago: number) {
+  const createdAt = new Date(Date.now() - ago);
+  await db.insert(round).values(Array.from({ length: count }, () => ({
+    playerUserId: "alice",
+    opponentUserId: "bob",
+    playerArgumentSnapshot: "earlier argument",
+    opponentDefenseSnapshot: "earlier defense",
+    createdAt,
+  })));
+}
+
+describe("createRoundFor limits", () => {
+  test("one round every five seconds, saying how long to wait", async () => {
+    await newRound();
+    const again = await createRoundFor("alice", "bob");
+    assert.equal(again.ok, false);
+    const limited = again.ok ? undefined : again.limited;
+    assert.equal(limited?.limit, "too_soon");
+    assert.ok(limited?.limit === "too_soon" && limited.retryInMs > 0 && limited.retryInMs <= ROUND_INTERVAL_MS);
+    assert.equal((await db.select().from(round)).length, 1);
+
+    // Someone else isn't held up by Alice's round
+    assert.ok((await createRoundFor("bob", "alice")).ok);
+  });
+
+  test("a round older than the interval doesn't hold the next one up", async () => {
+    await pastRounds(1, ROUND_INTERVAL_MS + 1_000);
+    assert.ok((await createRoundFor("alice", "bob")).ok);
+  });
+
+  test("a simultaneous burst creates exactly one round", async () => {
+    const results = await Promise.all(Array.from({ length: 5 }, () => createRoundFor("alice", "bob")));
+    assert.equal(results.filter(r => r.ok).length, 1);
+    assert.equal((await db.select().from(round)).length, 1);
+  });
+
+  test(`${ROUNDS_PER_DAY} rounds a day, counted over the last 24 hours`, async () => {
+    await pastRounds(ROUNDS_PER_DAY, 60 * 60_000);
+    const blocked = await createRoundFor("alice", "bob");
+    assert.deepEqual(blocked.ok ? undefined : blocked.limited, { limit: "daily_limit" });
+
+    // Yesterday's rounds have aged out
+    await db.delete(round);
+    await pastRounds(ROUNDS_PER_DAY - 1, 60 * 60_000);
+    await pastRounds(1, 25 * 60 * 60_000);
+    assert.ok((await createRoundFor("alice", "bob")).ok);
+  });
+});
+
 describe("resolveRoundFor", () => {
   test("concurrent requests: one claims and calls JEV, the other sees judging", async () => {
     const roundId = await newRound();
@@ -133,10 +184,13 @@ describe("resolveRoundFor", () => {
     assert.deepEqual(calls, [["I run an animal sanctuary.", "I maintain the production database."]]);
     assert.equal(resolved?.opponentDefenseSnapshot, "I maintain the production database.");
 
-    // The next round sees the new text; the old one keeps the old
-    const next = await newRound();
-    const [row] = await db.select().from(round).where(eq(round.id, next));
-    assert.equal(row.opponentDefenseSnapshot, "I rescue 40 million insects.");
+    // The next round sees the new text; the old one keeps the old. Bob starts it, since
+    // Alice has just played and must wait out the interval.
+    const next = await createRoundFor("bob", "alice");
+    assert.ok(next.ok);
+    const [row] = await db.select().from(round).where(eq(round.id, next.roundId));
+    assert.equal(row.playerArgumentSnapshot, "I rescue 40 million insects.");
+    assert.equal(row.opponentDefenseSnapshot, "Something else entirely.");
   });
 
   test("a JEV failure fails the round for good", async () => {

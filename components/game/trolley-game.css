@@ -200,3 +200,5 @@ figure.shake { animation: shake 0.45s; }
   font: 12px ui-monospace, monospace;
 }
 .dev-controls button { font: inherit; cursor: pointer; }
+/* Blocked-screen previews sit opposite the trolley controls */
+.dev-controls-left { right: auto; left: 8px; }
