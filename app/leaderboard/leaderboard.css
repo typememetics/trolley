@@ -8,7 +8,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.leaderboard-nav { margin: 8px 0 0; font-size: 15px; }
+.leaderboard-nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; font-size: 15px; }
 .leaderboard a { color: inherit; }
 
 /* Wide tables scroll inside themselves, never the page */

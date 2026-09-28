@@ -153,6 +153,9 @@ figcaption {
   border: 3px solid var(--ink);
 }
 .corner-link:hover { color: var(--bg); background: var(--ink); }
+/* The X logo alone, as square as the bar is tall */
+.corner-share { padding: 8px 12px; }
+.corner-share svg { width: 20px; height: 20px; }
 
 /* Every small button and button-like link: the corner link's look at a quieter size */
 .btn {
