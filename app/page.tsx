@@ -5,7 +5,7 @@ import { PlayableMatchup } from "@/components/game/PlayableMatchup";
 import { TrolleyGame, type Matchup } from "@/components/game/TrolleyGame";
 import { OpponentDefense } from "@/components/player/OpponentDefense";
 import { auth } from "@/lib/auth";
-import { getArchenemies, getPlayerStanding } from "@/lib/leaderboard/queries";
+import { getArchenemies } from "@/lib/leaderboard/queries";
 import { findRandomOpponent, toOpponentView } from "@/lib/player/opponent";
 import { getStandingDefense } from "@/lib/player/profile";
 import { createRound, resolveRound } from "@/lib/round/actions";
@@ -34,18 +34,13 @@ export default async function Home() {
   }
 
   // Everyone signed in gets an opponent. Your own defense only decides whether others can draw you.
-  const [defense, found, archenemies, standing] = await Promise.all([
+  const [defense, found, archenemies] = await Promise.all([
     getStandingDefense(session.user.id),
     findRandomOpponent(session.user.id),
     // Only decides whether the draw gets a splash; never worth failing the page over
     getArchenemies(session.user.id).catch(() => {
       console.error("Archenemies unavailable");
       return [];
-    }),
-    // Only feeds the share link; without it the link just isn't offered
-    getPlayerStanding(session.user.id).catch(() => {
-      console.error("Player standing unavailable");
-      return null;
     }),
   ]);
   // The opponent's defense is part of the visible matchup; their ids stay on the server.
@@ -79,7 +74,7 @@ export default async function Home() {
 
   return (
     <>
-      <CornerBar user={matchup.player} standing={standing}/>
+      <CornerBar user={matchup.player}/>
       {/* A new key per render: drawing the next opponent starts a fresh matchup */}
       <PlayableMatchup
         key={crypto.randomUUID()}

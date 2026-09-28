@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { ArrowLeftIcon } from "@/components/ui/icons";
-import { ShareOnXLink } from "@/components/ui/ShareOnXLink";
+import { ShareLinks } from "@/components/ui/ShareLinks";
 import { faceOf } from "@/components/game/face";
 import { auth } from "@/lib/auth";
 import { getLeaderboard, getLeaderboardTotals, getPlayerStanding } from "@/lib/leaderboard/queries";
@@ -36,7 +36,7 @@ export default async function LeaderboardPage() {
       <h1>Leaderboard</h1>
       <nav className="leaderboard-nav">
         <Link className="btn" href="/"><ArrowLeftIcon/> Back to game</Link>
-        {standing && <ShareOnXLink standing={standing}/>}
+        {standing && <ShareLinks standing={standing}/>}
       </nav>
       {totals && totals.rounds > 0 && (
         <dl className="leaderboard-totals">

@@ -153,9 +153,6 @@ figcaption {
   border: 3px solid var(--ink);
 }
 .corner-link:hover { color: var(--bg); background: var(--ink); }
-/* The X logo alone, as square as the bar is tall */
-.corner-share { padding: 8px 12px; }
-.corner-share svg { width: 20px; height: 20px; }
 
 /* Every small button and button-like link: the corner link's look at a quieter size */
 .btn {
@@ -177,6 +174,8 @@ figcaption {
 .btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .btn:disabled { opacity: 0.4; cursor: default; }
 .btn svg { flex: none; }
+/* The icon alone: its aria-label names the action */
+.btn-icon { padding: 5px 8px; }
 /* The one action a form exists for */
 .btn-primary { color: var(--bg); background: var(--ink); }
 .btn-primary:hover:not(:disabled) { color: var(--ink); background: var(--bg); }
