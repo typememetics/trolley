@@ -4,9 +4,11 @@ import "./globals.css";
 const description = "A runaway trolley. AGI with its hand on the lever. Two developers, one paragraph each, "
   + "explaining why they deserve to live.";
 
+const siteUrl = new URL("https://trolley.typememetics.institute/");
+
 // The share images come from opengraph-image.tsx and twitter-image.tsx beside this file
 export const metadata: Metadata = {
-  metadataBase: new URL("https://trolley.typememetics.institute/"),
+  metadataBase: siteUrl,
   title: "The Trolley Problem",
   description,
   openGraph: {
@@ -27,6 +29,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Not in the Metadata API, which would write name= instead of property= */}
+        <meta property="og:logo" content={new URL("/images/itsmr-logo.png", siteUrl).href}/>
+      </head>
       <body>
         {children}
         <footer className="made-by">
