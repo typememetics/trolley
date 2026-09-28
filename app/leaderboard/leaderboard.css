@@ -62,3 +62,22 @@
   opacity: 0.7;
 }
 .leaderboard-totals dd { margin: 2px 0 0; font-size: 24px; font-weight: bold; }
+
+/* The signed-in player's global standing, even outside the top 100 */
+.leaderboard-you {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin: 16px 0 0;
+  padding: 10px 16px;
+  background: #f4f0e8;
+  border: 1px solid var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.leaderboard-you dt {
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.leaderboard-you dd { margin: 2px 0 0; font-size: 24px; font-weight: bold; }

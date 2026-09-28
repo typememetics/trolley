@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: "Leaderboard · The Trolley Problem",
 };
 
-/** Elo interprets resolved history. Public; signing in only highlights your own row. */
+/** Elo interprets resolved history. Public; signing in adds your standing and highlights your row. */
 export default async function LeaderboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
 
@@ -42,6 +42,12 @@ export default async function LeaderboardPage() {
         <dl className="leaderboard-totals">
           <div><dt>Players</dt><dd>{totals.players}</dd></div>
           <div><dt>Rounds</dt><dd>{totals.rounds}</dd></div>
+        </dl>
+      )}
+      {standing && (
+        <dl className="leaderboard-you">
+          <div><dt>Your position</dt><dd>{standing.rank === null ? "Unranked" : `#${standing.rank}`}</dd></div>
+          <div><dt>Your Elo</dt><dd>{Math.round(standing.elo)}</dd></div>
         </dl>
       )}
 
