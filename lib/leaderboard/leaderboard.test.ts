@@ -6,7 +6,7 @@ import { after, before, beforeEach, describe, test } from "node:test";
 import { sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/libsql/migrator";
 import { db } from "@/lib/db";
-import { round, user } from "@/lib/db/schema";
+import { playerProfile, round, user } from "@/lib/db/schema";
 import type { LeverDecision } from "@/lib/game/types";
 import { archenemiesQuery, getArchenemies, getLeaderboard, getLeaderboardTotals, getPlayerStanding, leaderboardQuery, leaderboardTotalsQuery, playerStandingQuery } from "./queries";
 import type { LeaderboardEntry } from "./types";
@@ -187,6 +187,15 @@ describe("getLeaderboard", () => {
     assert.equal(board[0].eloGames, 9);
     assert.ok(board[0].elo > 1516);
     assert.equal(board[0].image, null); // Seed players need no avatar to compete.
+    assert.equal(board[0].githubLogin, null); // …nor a GitHub account.
+  });
+
+  test("carries the synced GitHub login for the profile link", async () => {
+    await users("Alice", "Bob");
+    await db.insert(playerProfile).values({ userId: "alice", githubLogin: "alice-gh" });
+    await resolved("alice", "bob", "flip");
+    const board = await getLeaderboard();
+    assert.deepEqual(board.map(e => [e.userId, e.githubLogin]), [["alice", "alice-gh"], ["bob", null]]);
   });
 
   test("name NOCASE and user id break exact Elo/game ties, including at the limit", async () => {

@@ -14,6 +14,7 @@ interface Candidate {
 interface Row extends Candidate {
   name: string;
   image: string | null;
+  githubLogin: string | null;
   rounds: number;
   survived: number;
   attackRounds: number;
@@ -70,10 +71,11 @@ export async function getLeaderboard(limit = 100): Promise<LeaderboardEntry[]> {
  */
 export const leaderboardQuery = (candidates: readonly Candidate[], limit: number) => sql`
   with candidate as materialized (
-    select user.id as userId, user.name, user.image,
+    select user.id as userId, user.name, user.image, player_profile.github_login as githubLogin,
       json_extract(value, '$.elo') as elo, json_extract(value, '$.eloGames') as eloGames
     from json_each(${JSON.stringify(candidates)})
     join user on user.id = json_extract(value, '$.userId')
+    left join player_profile on player_profile.user_id = user.id
     order by elo desc, eloGames desc, user.name collate nocase asc, user.id asc
     limit ${limit}
   ), outcome as (

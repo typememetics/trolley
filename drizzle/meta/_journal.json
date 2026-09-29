@@ -43,6 +43,13 @@
       "when": 1790506229172,
       "tag": "0005_round_rate_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1790669889337,
+      "tag": "0006_player_github_login",
+      "breakpoints": true
     }
   ]
 }

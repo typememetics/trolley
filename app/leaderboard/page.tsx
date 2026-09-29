@@ -76,7 +76,11 @@ export default async function LeaderboardPage() {
                     <th scope="row" className="player">
                       <span className="who">
                         <img src={face.src} alt="" width={28} height={28}/>
-                        {entry.name}
+                        {entry.githubLogin ? (
+                          <a href={`https://github.com/${entry.githubLogin}`} target="_blank" rel="noopener noreferrer">
+                            {entry.name}
+                          </a>
+                        ) : entry.name}
                         {you && <span className="you-tag">You</span>}
                       </span>
                     </th>

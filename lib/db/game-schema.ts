@@ -15,6 +15,8 @@ export const playerProfile = sqliteTable("player_profile", {
     .primaryKey()
     .references(() => user.id, { onDelete: "cascade" }),
   standingDefense: text("standing_defense"),
+  // Current GitHub username, looked up by the account's stable numeric id. Null until fetched.
+  githubLogin: text("github_login"),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
