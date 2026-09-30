@@ -73,11 +73,18 @@ export async function rebuildEloFromHistory(): Promise<EloRatings> {
   return replayElo(new Map(), await loadEloMatches());
 }
 
-export async function getCurrentEloRatings(): Promise<EloRatings> {
+export async function getCurrentEloState(): Promise<{ ratings: EloRatings; rounds: number }> {
   const checkpoint = await loadLatestEloCheckpoint();
   const matches = await loadEloMatches(checkpoint?.cutoff);
   if (!checkpoint && matches.length >= 50_000) {
     console.warn("Elo full history fallback", { algorithmVersion: ELO_ALGORITHM_VERSION, rounds: matches.length });
   }
-  return replayElo(checkpoint?.ratings ?? new Map(), matches);
+  return {
+    ratings: replayElo(checkpoint?.ratings ?? new Map(), matches),
+    rounds: (checkpoint?.roundsProcessed ?? 0) + matches.length,
+  };
+}
+
+export async function getCurrentEloRatings(): Promise<EloRatings> {
+  return (await getCurrentEloState()).ratings;
 }

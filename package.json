@@ -12,6 +12,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:check": "drizzle-kit check",
     "db:seed": "node scripts/seed.mts",
+    "github:sync": "node --conditions=react-server --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/test-hooks.mts scripts/sync-github-logins.mts",
     "elo:checkpoint": "node --conditions=react-server --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/test-hooks.mts scripts/build-elo-checkpoint.mts",
     "test": "node --conditions=react-server --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/test-hooks.mts --test \"lib/**/*.test.ts\"",
     "auth:generate": "auth generate --config lib/auth.ts --output lib/db/auth-schema.ts",

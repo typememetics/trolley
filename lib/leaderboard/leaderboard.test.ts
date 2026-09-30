@@ -6,9 +6,9 @@ import { after, before, beforeEach, describe, test } from "node:test";
 import { sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/libsql/migrator";
 import { db } from "@/lib/db";
-import { round, user } from "@/lib/db/schema";
+import { playerProfile, round, user } from "@/lib/db/schema";
 import type { LeverDecision } from "@/lib/game/types";
-import { archenemiesQuery, getArchenemies, getLeaderboard, getLeaderboardTotals, getPlayerStanding, leaderboardQuery, leaderboardTotalsQuery, playerStandingQuery } from "./queries";
+import { archenemiesQuery, getArchenemies, getLeaderboard, getLeaderboardTotals, getPlayerStanding, leaderboardQuery, playerStanding } from "./queries";
 import type { LeaderboardEntry } from "./types";
 
 // A throwaway SQLite file, migrated exactly as Turso is. `db` connects on first use.
@@ -104,7 +104,7 @@ describe("desktop player standing", () => {
     const board = await db.all<{ userId: string; elo: number }>(leaderboardQuery(candidates, 1000));
     assert.deepEqual(board.slice(0, 4).map(row => row.userId), ["player000", "player001", "tie-a", "tie-b"]);
     for (const [index, entry] of board.entries()) {
-      assert.deepEqual(await db.all(playerStandingQuery(candidates, entry.userId)), [{ elo: entry.elo, rank: index + 1 }]);
+      assert.deepEqual(await playerStanding(candidates, entry.userId), { elo: entry.elo, rank: index + 1 });
     }
     assert.equal(board.length, 107);
   });
@@ -187,6 +187,15 @@ describe("getLeaderboard", () => {
     assert.equal(board[0].eloGames, 9);
     assert.ok(board[0].elo > 1516);
     assert.equal(board[0].image, null); // Seed players need no avatar to compete.
+    assert.equal(board[0].githubLogin, null); // …nor a GitHub account.
+  });
+
+  test("carries the synced GitHub login for the profile link", async () => {
+    await users("Alice", "Bob");
+    await db.insert(playerProfile).values({ userId: "alice", githubLogin: "alice-gh" });
+    await resolved("alice", "bob", "flip");
+    const board = await getLeaderboard();
+    assert.deepEqual(board.map(e => [e.userId, e.githubLogin]), [["alice", "alice-gh"], ["bob", null]]);
   });
 
   test("name NOCASE and user id break exact Elo/game ties, including at the limit", async () => {
@@ -224,7 +233,8 @@ describe("getLeaderboard", () => {
   test("aggregates from the resolved-round index, never the round rows", async () => {
     const plan = await db.all<{ detail: string }>(sql`explain query plan ${leaderboardQuery([{ userId: "alice", elo: 1516, eloGames: 1 }], 100)}`);
     const details = plan.map(row => row.detail);
-    assert.equal(details.filter(d => d.includes("COVERING INDEX round_resolved_outcome_idx")).length, 2, details.join("\n"));
+    assert.equal(details.filter(d => d.includes("COVERING INDEX round_resolved_outcome_idx (player_user_id=?)")).length, 1, details.join("\n"));
+    assert.equal(details.filter(d => d.includes("COVERING INDEX round_resolved_by_opponent_idx (opponent_user_id=?)")).length, 1, details.join("\n"));
   });
 });
 
@@ -238,12 +248,6 @@ describe("getLeaderboardTotals", () => {
     await resolved("bob", "alice", "dont_flip");
     await resolved("carol", "bob", "flip");
     assert.deepEqual(await getLeaderboardTotals(), { players: 3, rounds: 3 });
-  });
-
-  test("counts from the resolved-round index, never the round rows", async () => {
-    const plan = await db.all<{ detail: string }>(sql`explain query plan ${leaderboardTotalsQuery}`);
-    const details = plan.map(row => row.detail);
-    assert.equal(details.filter(d => d.includes("COVERING INDEX round_resolved_outcome_idx")).length, 3, details.join("\n"));
   });
 });
 
@@ -278,6 +282,7 @@ describe("getArchenemies", () => {
   test("reads from the resolved-round index, never the round rows", async () => {
     const plan = await db.all<{ detail: string }>(sql`explain query plan ${archenemiesQuery("alice", 5)}`);
     const details = plan.map(row => row.detail);
-    assert.equal(details.filter(d => d.includes("COVERING INDEX round_resolved_outcome_idx")).length, 2, details.join("\n"));
+    assert.equal(details.filter(d => d.includes("COVERING INDEX round_resolved_outcome_idx (player_user_id=?)")).length, 1, details.join("\n"));
+    assert.equal(details.filter(d => d.includes("COVERING INDEX round_resolved_by_opponent_idx (opponent_user_id=?)")).length, 1, details.join("\n"));
   });
 });

@@ -1,0 +1,2 @@
+CREATE INDEX `account_provider_account_idx` ON `account` (`provider_id`,`account_id`);--> statement-breakpoint
+CREATE INDEX `round_resolved_by_opponent_idx` ON `round` (`opponent_user_id`,`player_user_id`,`decision`) WHERE "round"."status" = 'resolved';

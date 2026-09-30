@@ -10,6 +10,8 @@ export interface LeaderboardEntry {
   userId: string;
   name: string;
   image: string | null;
+  /** GitHub username for the profile link; null until synced, or for seed players. */
+  githubLogin: string | null;
 
   /** Raw Elo, rounded only by the UI. */
   elo: number;

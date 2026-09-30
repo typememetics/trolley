@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { getPlayerStanding } from "@/lib/leaderboard/queries";
+import { getCachedPlayerStanding } from "@/lib/leaderboard/queries";
 
 export const runtime = "nodejs";
 
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     if (!session) {
       return Response.json({ authenticated: false }, { status: 401, headers: privateHeaders });
     }
-    const standing = await getPlayerStanding(session.user.id);
+    const standing = await getCachedPlayerStanding(session.user.id);
     return Response.json({
       authenticated: true,
       name: session.user.name,

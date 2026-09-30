@@ -15,6 +15,8 @@ export const playerProfile = sqliteTable("player_profile", {
     .primaryKey()
     .references(() => user.id, { onDelete: "cascade" }),
   standingDefense: text("standing_defense"),
+  // Current GitHub username, looked up by the account's stable numeric id. Null until fetched.
+  githubLogin: text("github_login"),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
@@ -78,6 +80,10 @@ export const round = sqliteTable("round", {
   // Covers the leaderboard: every resolved round's two sides and verdict, without reading the snapshots
   index("round_resolved_outcome_idx")
     .on(table.playerUserId, table.opponentUserId, table.decision)
+    .where(sql`${table.status} = 'resolved'`),
+  // The same, seeking by opponent: the other side of the leaderboard and archenemy lookups
+  index("round_resolved_by_opponent_idx")
+    .on(table.opponentUserId, table.playerUserId, table.decision)
     .where(sql`${table.status} = 'resolved'`),
   index("round_elo_replay_idx")
     .on(table.resolvedAt, table.id, table.playerUserId, table.opponentUserId, table.decision)

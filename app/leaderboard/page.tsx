@@ -6,7 +6,8 @@ import { ArrowLeftIcon } from "@/components/ui/icons";
 import { ShareLinks } from "@/components/ui/ShareLinks";
 import { faceOf } from "@/components/game/face";
 import { auth } from "@/lib/auth";
-import { getLeaderboard, getLeaderboardTotals, getPlayerStanding } from "@/lib/leaderboard/queries";
+import { getCachedLeaderboard, getCachedLeaderboardTotals } from "@/lib/leaderboard/cached";
+import { getCachedPlayerStanding } from "@/lib/leaderboard/queries";
 
 export const metadata: Metadata = {
   title: "Leaderboard · The Trolley Problem",
@@ -17,15 +18,15 @@ export default async function LeaderboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
 
   const [entries, totals, standing] = await Promise.all([
-    getLeaderboard().catch(() => {
+    getCachedLeaderboard().catch(() => {
       console.error("Elo leaderboard unavailable");
       return null;
     }),
-    getLeaderboardTotals().catch(() => {
+    getCachedLeaderboardTotals().catch(() => {
       console.error("Leaderboard totals unavailable");
       return null;
     }),
-    session && getPlayerStanding(session.user.id).catch(() => {
+    session && getCachedPlayerStanding(session.user.id).catch(() => {
       console.error("Player standing unavailable");
       return null;
     }),
@@ -76,7 +77,11 @@ export default async function LeaderboardPage() {
                     <th scope="row" className="player">
                       <span className="who">
                         <img src={face.src} alt="" width={28} height={28}/>
-                        {entry.name}
+                        {entry.githubLogin ? (
+                          <a href={`https://github.com/${entry.githubLogin}`} target="_blank" rel="noopener noreferrer">
+                            {entry.name}
+                          </a>
+                        ) : entry.name}
                         {you && <span className="you-tag">You</span>}
                       </span>
                     </th>
