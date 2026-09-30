@@ -81,6 +81,10 @@ export const round = sqliteTable("round", {
   index("round_resolved_outcome_idx")
     .on(table.playerUserId, table.opponentUserId, table.decision)
     .where(sql`${table.status} = 'resolved'`),
+  // The same, seeking by opponent: the other side of the leaderboard and archenemy lookups
+  index("round_resolved_by_opponent_idx")
+    .on(table.opponentUserId, table.playerUserId, table.decision)
+    .where(sql`${table.status} = 'resolved'`),
   index("round_elo_replay_idx")
     .on(table.resolvedAt, table.id, table.playerUserId, table.opponentUserId, table.decision)
     .where(sql`${table.status} = 'resolved'`),

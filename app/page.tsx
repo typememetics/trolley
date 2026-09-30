@@ -5,7 +5,7 @@ import { PlayableMatchup } from "@/components/game/PlayableMatchup";
 import { TrolleyGame, type Matchup } from "@/components/game/TrolleyGame";
 import { OpponentDefense } from "@/components/player/OpponentDefense";
 import { auth } from "@/lib/auth";
-import { getArchenemies } from "@/lib/leaderboard/queries";
+import { getCachedArchenemies } from "@/lib/leaderboard/cached";
 import { findRandomOpponent, toOpponentView } from "@/lib/player/opponent";
 import { getStandingDefense } from "@/lib/player/profile";
 import { createRound, resolveRound } from "@/lib/round/actions";
@@ -38,7 +38,7 @@ export default async function Home() {
     getStandingDefense(session.user.id),
     findRandomOpponent(session.user.id),
     // Only decides whether the draw gets a splash; never worth failing the page over
-    getArchenemies(session.user.id).catch(() => {
+    getCachedArchenemies(session.user.id).catch(() => {
       console.error("Archenemies unavailable");
       return [];
     }),

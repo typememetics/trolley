@@ -218,7 +218,7 @@ describe("checkpoint construction", () => {
     await snapshot("empty-old", T, new Map(), { readyAt: T });
     assert.deepEqual(await buildEloCheckpointIfNeeded(), { status: "not_needed" });
   });
-  test("threshold is 5000 eligible rounds, and age permits a smaller delta", async () => {
+  test("threshold is ELO_CHECKPOINT_MIN_NEW_ROUNDS eligible rounds, and age permits a smaller delta", async () => {
     const all = history(ELO_CHECKPOINT_MIN_NEW_ROUNDS - 1);
     await insertMatches(all);
     await snapshot("baseline", T, new Map());

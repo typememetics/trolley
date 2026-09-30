@@ -29,11 +29,11 @@ Any change to rating semantics must change the algorithm version too.
 
 ## Checkpoints
 
-An hourly authenticated cron checks for 5,000 eligible new rounds, or a ready
+An hourly authenticated cron checks for 1,000 eligible new rounds, or a ready
 checkpoint at least 24 hours old with at least one new eligible round. The first
 checkpoint builds whenever eligible history exists. The one-minute safety window
-is excluded from eligible counts. At 12,000 games/day this normally gives 2–3
-checkpoints/day and roughly 5,000–5,500 rounds in the tail between cron checks.
+is excluded from eligible counts. At 12,000 games/day this normally gives up to 12
+checkpoints/day and roughly 1,000–1,500 rounds in the tail between cron checks.
 
 A partial unique index permits one building row per version. Builds older than
 15 minutes become failed. Each builder re-reads the latest ready state after
